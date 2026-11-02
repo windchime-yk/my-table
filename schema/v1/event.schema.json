@@ -4,54 +4,184 @@
   "title": "マイテーブル イベントデータ v1",
   "description": "1イベント1ファイル。イベント → 日 → ステージ → 枠 の4階層。時刻はイベントのタイムゾーンでの HH:MM で、日をまたぐ深夜帯は 24:30 のように24時以降で書く。",
   "type": "object",
-  "required": ["schema_version", "id", "visibility", "event", "days"],
-  "additionalProperties": false,
   "properties": {
     "$schema": {
       "description": "エディタ補完用。このスキーマの URL を書く",
       "type": "string"
     },
     "schema_version": {
-      "description": "スキーマのバージョン",
+      "type": "string",
       "const": "1"
     },
     "id": {
-      "description": "イベントID。ファイル名と揃える。URL（/e/<id>）になる",
-      "$ref": "#/$defs/slug"
-    },
-    "visibility": {
-      "description": "public はサイトに含める。private はビルドから除外する",
-      "enum": ["public", "private"]
-    },
-    "event": { "$ref": "#/$defs/eventInfo" },
-    "tag_definitions": {
-      "description": "タグのキーと表示名。例: { \"no_photo\": \"撮影禁止\" }",
-      "type": "object",
-      "additionalProperties": { "$ref": "#/$defs/text" }
-    },
-    "days": {
-      "description": "開催日。1日以上",
-      "type": "array",
-      "minItems": 1,
-      "items": { "$ref": "#/$defs/day" }
-    }
-  },
-  "$defs": {
-    "slug": {
+      "description": "イベントID。英小文字・数字・ハイフン。ファイル名と揃える。URL（/e/<id>）になる",
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9-]*$"
     },
-    "text": {
+    "visibility": {
+      "description": "public はサイトに含める。private はビルドから除外する",
       "type": "string",
-      "minLength": 1
+      "enum": [
+        "public",
+        "private"
+      ]
     },
-    "optionalText": {
-      "type": ["string", "null"],
-      "minLength": 1
+    "event": {
+      "$ref": "#/$defs/eventInfo"
     },
-    "textList": {
+    "tag_definitions": {
+      "description": "タグのキーと表示名。例: { \"no_photo\": \"撮影禁止\" }",
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "days": {
+      "minItems": 1,
       "type": "array",
-      "items": { "$ref": "#/$defs/text" }
+      "items": {
+        "$ref": "#/$defs/day"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "visibility",
+    "event",
+    "days"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "eventInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "イベント名",
+          "type": "string",
+          "minLength": 1
+        },
+        "venue": {
+          "description": "会場",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timezone": {
+          "description": "IANA タイムゾーン（例: Asia/Tokyo）",
+          "type": "string",
+          "minLength": 1
+        },
+        "official_url": {
+          "description": "公式サイト",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sources": {
+          "description": "取り込み元（公式タイムテーブル画像、公式告知など）の説明",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notice": {
+          "description": "公式の注意書き",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "detail_url_base": {
+          "description": "枠の detail を相対パスで書くときの基準 URL",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "timezone"
+      ],
+      "additionalProperties": false
+    },
+    "day": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "label": {
+          "description": "表示名（例: DAY1）",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_time": {
+          "description": "終演時刻",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "day_events": {
+          "description": "開場・休憩・懇親会など、選択の対象にしない時間帯",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dayEvent"
+          }
+        },
+        "stages": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stage"
+          }
+        }
+      },
+      "required": [
+        "date",
+        "stages"
+      ],
+      "additionalProperties": false
     },
     "date": {
       "description": "YYYY-MM-DD",
@@ -63,142 +193,320 @@
       "type": "string",
       "pattern": "^[0-4]\\d:[0-5]\\d$"
     },
-    "optionalTime": {
-      "type": ["string", "null"],
-      "pattern": "^[0-4]\\d:[0-5]\\d$"
-    },
-    "eventInfo": {
-      "type": "object",
-      "required": ["name", "timezone"],
-      "additionalProperties": false,
-      "properties": {
-        "name": { "description": "イベント名", "$ref": "#/$defs/text" },
-        "venue": { "description": "会場", "$ref": "#/$defs/optionalText" },
-        "timezone": { "description": "IANA タイムゾーン（例: Asia/Tokyo）", "$ref": "#/$defs/text" },
-        "official_url": { "description": "公式サイト", "$ref": "#/$defs/optionalText" },
-        "sources": { "description": "取り込み元（公式タイムテーブル画像、公式告知など）の説明", "$ref": "#/$defs/textList" },
-        "notice": { "description": "公式の注意書き", "$ref": "#/$defs/optionalText" },
-        "detail_url_base": {
-          "description": "枠の detail を相対パスで書くときの基準 URL",
-          "$ref": "#/$defs/optionalText"
-        }
-      }
-    },
-    "day": {
-      "type": "object",
-      "required": ["date", "stages"],
-      "additionalProperties": false,
-      "properties": {
-        "date": { "$ref": "#/$defs/date" },
-        "label": { "description": "表示名（例: DAY1）", "$ref": "#/$defs/optionalText" },
-        "end_time": { "description": "終演時刻", "$ref": "#/$defs/optionalTime" },
-        "day_events": {
-          "description": "開場・休憩・懇親会など、選択の対象にしない時間帯",
-          "type": "array",
-          "items": { "$ref": "#/$defs/dayEvent" }
-        },
-        "stages": {
-          "description": "ステージ。1つ以上",
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/$defs/stage" }
-        }
-      }
-    },
     "dayEvent": {
       "type": "object",
-      "required": ["start", "title", "kind"],
-      "additionalProperties": false,
       "properties": {
-        "start": { "$ref": "#/$defs/time" },
-        "end": { "$ref": "#/$defs/optionalTime" },
-        "title": { "$ref": "#/$defs/text" },
-        "kind": { "enum": ["doors", "break", "ceremony", "party", "setup", "close", "other"] },
+        "start": {
+          "$ref": "#/$defs/time"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "doors",
+            "break",
+            "ceremony",
+            "party",
+            "setup",
+            "close",
+            "other"
+          ]
+        },
         "stages": {
           "description": "対象のステージID。省略すると全ステージ共通",
           "type": "array",
-          "items": { "$ref": "#/$defs/text" }
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
-      }
+      },
+      "required": [
+        "start",
+        "title",
+        "kind"
+      ],
+      "additionalProperties": false
     },
     "stage": {
       "type": "object",
-      "required": ["id", "name", "slots"],
-      "additionalProperties": false,
       "properties": {
-        "id": { "description": "日の中で一意", "$ref": "#/$defs/text" },
-        "name": { "$ref": "#/$defs/text" },
-        "color": { "description": "表示色（CSS の色。OKLCH 推奨）", "$ref": "#/$defs/optionalText" },
-        "hashtag": { "$ref": "#/$defs/optionalText" },
+        "id": {
+          "description": "日の中で一意",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "color": {
+          "description": "表示色（CSS の色。OKLCH で書く）",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hashtag": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "closed": {
           "description": "ステージが閉まっている時間帯",
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["start", "end"],
-            "additionalProperties": false,
             "properties": {
-              "start": { "$ref": "#/$defs/time" },
-              "end": { "$ref": "#/$defs/time" }
-            }
+              "start": {
+                "$ref": "#/$defs/time"
+              },
+              "end": {
+                "$ref": "#/$defs/time"
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ],
+            "additionalProperties": false
           }
         },
         "slots": {
           "type": "array",
-          "items": { "$ref": "#/$defs/slot" }
+          "items": {
+            "$ref": "#/$defs/slot"
+          }
         }
-      }
+      },
+      "required": [
+        "id",
+        "name",
+        "slots"
+      ],
+      "additionalProperties": false
     },
     "slot": {
       "type": "object",
-      "required": ["id", "start", "end", "end_source", "title", "category"],
-      "additionalProperties": false,
       "properties": {
         "id": {
           "description": "イベント内で一意（items の id とも重複しない）。一度公開したら時刻が変わっても変えない",
-          "$ref": "#/$defs/text"
+          "type": "string",
+          "minLength": 1
         },
-        "start": { "$ref": "#/$defs/time" },
-        "end": { "$ref": "#/$defs/time" },
+        "start": {
+          "$ref": "#/$defs/time"
+        },
+        "end": {
+          "$ref": "#/$defs/time"
+        },
         "end_source": {
           "description": "終了時刻の根拠。explicit 公式に記載 / next_slot 次の枠と連続 / inferred 推定 / day_end 終演時刻から",
-          "enum": ["explicit", "next_slot", "inferred", "day_end"]
+          "type": "string",
+          "enum": [
+            "explicit",
+            "next_slot",
+            "inferred",
+            "day_end"
+          ]
         },
         "title": {
-          "description": "枠の名前。items がない枠では必須（null 不可）",
-          "$ref": "#/$defs/optionalText"
+          "description": "枠の名前。items がある枠だけ null にできる",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "category": { "enum": ["performance", "talk", "keynote", "workshop", "ceremony", "other"] },
-        "kind_label": { "description": "元の表記（LIVE、DJ、10分セッションなど）", "$ref": "#/$defs/optionalText" },
-        "speakers": { "description": "出演者・登壇者", "$ref": "#/$defs/textList" },
-        "note": { "description": "補足（ゲスト、押しの情報など）", "$ref": "#/$defs/optionalText" },
-        "subtitle": { "$ref": "#/$defs/optionalText" },
-        "lang": { "description": "言語（ja、en など）", "$ref": "#/$defs/optionalText" },
-        "tags": { "description": "tag_definitions に定義したキー", "$ref": "#/$defs/textList" },
-        "simulcast_in": { "description": "同時中継先のステージID", "$ref": "#/$defs/textList" },
+        "category": {
+          "type": "string",
+          "enum": [
+            "performance",
+            "talk",
+            "keynote",
+            "workshop",
+            "ceremony",
+            "other"
+          ]
+        },
+        "kind_label": {
+          "description": "元の表記（LIVE、DJ、10分セッションなど）",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "speakers": {
+          "description": "出演者・登壇者",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "note": {
+          "description": "補足（ゲスト、押しの情報など）",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "subtitle": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lang": {
+          "description": "言語（ja、en など）",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "description": "tag_definitions に定義したキー",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "simulcast_in": {
+          "description": "同時中継先のステージID",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
         "detail": {
           "description": "詳細ページの URL（または detail_url_base からの相対パス）",
-          "$ref": "#/$defs/optionalText"
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "external_url": { "description": "外部申込などの URL", "$ref": "#/$defs/optionalText" },
+        "external_url": {
+          "description": "外部申込などの URL",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "items": {
           "description": "1つの枠に、個別の開始時刻なしで複数のトークが入る場合のトーク一覧",
-          "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/item" }
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/item"
+          }
         }
-      }
+      },
+      "required": [
+        "id",
+        "start",
+        "end",
+        "end_source",
+        "title",
+        "category"
+      ],
+      "additionalProperties": false
     },
     "item": {
       "type": "object",
-      "required": ["id", "title"],
-      "additionalProperties": false,
       "properties": {
-        "id": { "description": "イベント内で一意", "$ref": "#/$defs/text" },
-        "title": { "$ref": "#/$defs/text" },
-        "speakers": { "$ref": "#/$defs/textList" },
-        "detail": { "$ref": "#/$defs/optionalText" }
-      }
+        "id": {
+          "description": "イベント内で一意",
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "speakers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "additionalProperties": false
     }
   }
 }

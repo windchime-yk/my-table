@@ -1,87 +1,17 @@
-// イベントデータ（schema/v1/event.schema.json）の型。スキーマを変えたらここも合わせる
+// イベントデータの型。schema/v1/event.ts（Zod）の定義から作る
 
-export type Visibility = "public" | "private";
-export type EndSource = "explicit" | "next_slot" | "inferred" | "day_end";
-export type Category = "performance" | "talk" | "keynote" | "workshop" | "ceremony" | "other";
-export type DayEventKind = "doors" | "break" | "ceremony" | "party" | "setup" | "close" | "other";
-
-export interface Item {
-  id: string;
-  title: string;
-  speakers?: string[];
-  detail?: string | null;
-}
-
-export interface Slot {
-  id: string;
-  start: string;
-  end: string;
-  end_source: EndSource;
-  /** items がある枠だけ null にできる */
-  title: string | null;
-  category: Category;
-  kind_label?: string | null;
-  speakers?: string[];
-  note?: string | null;
-  subtitle?: string | null;
-  lang?: string | null;
-  tags?: string[];
-  simulcast_in?: string[];
-  detail?: string | null;
-  external_url?: string | null;
-  items?: Item[];
-}
-
-export interface ClosedRange {
-  start: string;
-  end: string;
-}
-
-export interface Stage {
-  id: string;
-  name: string;
-  color?: string | null;
-  hashtag?: string | null;
-  closed?: ClosedRange[];
-  slots: Slot[];
-}
-
-export interface DayEvent {
-  start: string;
-  end?: string | null;
-  title: string;
-  kind: DayEventKind;
-  stages?: string[];
-}
-
-export interface Day {
-  date: string;
-  label?: string | null;
-  end_time?: string | null;
-  day_events?: DayEvent[];
-  stages: Stage[];
-}
-
-export interface EventInfo {
-  name: string;
-  venue?: string | null;
-  timezone: string;
-  official_url?: string | null;
-  sources?: string[];
-  notice?: string | null;
-  detail_url_base?: string | null;
-}
+import type { z } from "zod";
+import type { eventFileSchema } from "../../schema/v1/event.ts";
 
 /** events/*.json の中身 */
-export interface EventFile {
-  $schema?: string;
-  schema_version: "1";
-  id: string;
-  visibility: Visibility;
-  event: EventInfo;
-  tag_definitions?: Record<string, string>;
-  days: Day[];
-}
+export type EventFile = z.output<typeof eventFileSchema>;
+export type Day = EventFile["days"][number];
+export type DayEvent = NonNullable<Day["day_events"]>[number];
+export type Stage = Day["stages"][number];
+export type Slot = Stage["slots"][number];
+export type Item = NonNullable<Slot["items"]>[number];
+export type EndSource = Slot["end_source"];
+export type Category = Slot["category"];
 
 /** ビルド時に付けた情報を足した、サイトに同梱するイベント */
 export interface EventDoc extends Omit<EventFile, "$schema" | "visibility"> {

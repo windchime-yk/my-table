@@ -41,8 +41,9 @@ flowchart TB
 ### 置き場所とチェック
 
 ```
-events/<event-id>.json   1イベント1ファイル。ファイル名はイベントID と揃える
-schema/v1/event.schema.json   JSON Schema の原本
+events/<event-id>.json        1イベント1ファイル。ファイル名はイベントID と揃える
+schema/v1/event.ts            スキーマの定義（Zod）。型・チェック・JSON Schema はここから作る
+schema/v1/event.schema.json   JSON Schema。event.ts から `pnpm schema` で生成する
 ```
 
 - JSON Schema は https://mt.whyk.dev/schema/v1/event.schema.json でも配信している。データの先頭に `"$schema": "https://mt.whyk.dev/schema/v1/event.schema.json"` と書くと、エディタで補完とチェックが効く。AI エージェントにデータを組み立ててもらうときも、このスキーマを渡す

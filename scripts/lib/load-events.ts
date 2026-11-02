@@ -30,8 +30,8 @@ export function checkFile(path: string): CheckedFile {
   const result = validateEvent(value);
   const errors = result.errors.map((m) => `${name}: ${m}`);
   const warnings = result.warnings.map((m) => `${name}: ${m}`);
-  if (errors.length > 0) return { path, doc: null, raw, errors, warnings };
-  const doc = value as EventFile;
+  const { doc } = result;
+  if (!doc) return { path, doc: null, raw, errors, warnings };
   if (name !== `${doc.id}.json`) {
     errors.push(`${name}: ファイル名をイベントID に合わせて ${doc.id}.json にしてください`);
     return { path, doc: null, raw, errors, warnings };

@@ -5,44 +5,51 @@ import { validEvent } from "./helpers.ts";
 const errorsOf = (value: unknown) => validateEvent(value).errors;
 
 describe("validateEvent: スキーマ", () => {
-  it("正しいデータはエラーも警告もない", () => {
-    expect(validateEvent(validEvent())).toEqual({ errors: [], warnings: [] });
+  it("正しいデータはエラーも警告もなく、チェック済みのデータを返す", () => {
+    const result = validateEvent(validEvent());
+    expect(result.errors).toEqual([]);
+    expect(result.warnings).toEqual([]);
+    expect(result.doc?.id).toBe("example-fes-2026");
   });
 
   it("必須項目がないとエラー", () => {
     const doc: Record<string, unknown> = { ...validEvent() };
     delete doc.visibility;
-    expect(errorsOf(doc)).toEqual(["(ルート): visibility は必須です"]);
+    expect(errorsOf(doc)).toEqual(["visibility: 必須です"]);
   });
 
   it("schema_version が 1 でないとエラー", () => {
     expect(errorsOf({ ...validEvent(), schema_version: "0.4" })).toEqual([
-      'schema_version: "1" にしてください（実際は "0.4"）',
+      'schema_version: 無効な入力: "1"が期待されました',
     ]);
   });
 
   it("時刻の形式が違うとエラー", () => {
     const doc = validEvent();
     doc.days[0].stages[0].slots[0].start = "9:30";
-    expect(errorsOf(doc)).toEqual(['days[0].stages[0].slots[0].start: 形式が正しくありません（"9:30"）']);
+    expect(errorsOf(doc)).toEqual([
+      "days[0].stages[0].slots[0].start: 無効な文字列: パターン/^[0-4]\\d:[0-5]\\d$/に一致する必要があります",
+    ]);
   });
 
   it("列挙値にない値はエラー", () => {
     const doc = validEvent();
     Object.assign(doc.days[0].stages[0].slots[0], { category: "live" });
-    expect(errorsOf(doc)[0]).toMatch(/^days\[0\]\.stages\[0\]\.slots\[0\]\.category: "performance" \/ /);
+    expect(errorsOf(doc)[0]).toMatch(/^days\[0\]\.stages\[0\]\.slots\[0\]\.category: 無効な選択: "performance"、/);
   });
 
   it("スキーマにない項目はエラー（綴りの間違いに気づけるように）", () => {
     const doc = validEvent();
     Object.assign(doc.days[0].stages[0].slots[0], { speaker: ["A"] });
-    expect(errorsOf(doc)).toEqual(["days[0].stages[0].slots[0].speaker: スキーマにない項目です"]);
+    expect(errorsOf(doc)).toEqual(['days[0].stages[0].slots[0]: 認識されていないキー: "speaker"']);
   });
 
   it("型が違うとエラー", () => {
     const doc = validEvent();
     Object.assign(doc.days[0].stages[0].slots[0], { speakers: "A" });
-    expect(errorsOf(doc)).toEqual(["days[0].stages[0].slots[0].speakers: array が必要です（実際は string）"]);
+    expect(errorsOf(doc)).toEqual([
+      "days[0].stages[0].slots[0].speakers: 無効な入力: arrayが期待されましたが、stringが入力されました",
+    ]);
   });
 
   it("任意の項目は null にできる", () => {

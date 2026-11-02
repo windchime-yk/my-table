@@ -1,13 +1,17 @@
-// イベントデータの整合チェック。JSON Schema で形を確かめたあと、項目をまたぐ規則を確かめる。
+// イベントデータの整合チェック。スキーマ（schema/v1/event.ts）で形を確かめたあと、項目をまたぐ規則を確かめる。
 // エラーはビルドを止める。元データ自体の矛盾（休憩と枠の重なりなど）は警告に留め、自動では直さない。
 
+import { z } from "zod";
+import { eventFileSchema } from "../../schema/v1/event.ts";
 import type { EventFile } from "../../src/shared/event.ts";
-import schema from "../../schema/v1/event.schema.json" with { type: "json" };
-import { checkSchema, type JsonSchema } from "./json-schema.ts";
+
+z.config(z.locales.ja());
 
 export interface ValidationResult {
   errors: string[];
   warnings: string[];
+  /** エラーがなければ、チェック済みのデータ */
+  doc?: EventFile;
 }
 
 const toMinutes = (time: string): number => {
@@ -21,17 +25,37 @@ interface Span {
   what: string;
 }
 
+/** ["days", 0, "stages"] → "days[0].stages" */
+const formatPath = (path: PropertyKey[]): string => {
+  let out = "";
+  for (const key of path) out += typeof key === "number" ? `[${key}]` : `${out ? "." : ""}${String(key)}`;
+  return out || "(ルート)";
+};
+
+/** その場所に項目がない（Zod は「型が違う」と報告するので、必須項目の欠落として言い直すため） */
+const isMissing = (value: unknown, path: PropertyKey[]): boolean => {
+  if (path.length === 0) return false;
+  let parent = value;
+  for (const key of path.slice(0, -1)) parent = (parent as Record<PropertyKey, unknown>)?.[key];
+  return typeof parent === "object" && parent !== null && !(path[path.length - 1] in parent);
+};
+
 export function validateEvent(value: unknown): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   const error = (path: string, message: string) => errors.push(`${path}: ${message}`);
   const warn = (path: string, message: string) => warnings.push(`${path}: ${message}`);
 
-  for (const e of checkSchema(schema as JsonSchema, value)) error(e.path, e.message);
+  const parsed = eventFileSchema.safeParse(value);
   // 形が崩れていると以降の規則を正しく確かめられないので、ここで止める
-  if (errors.length > 0) return { errors, warnings };
+  if (!parsed.success) {
+    for (const issue of parsed.error.issues) {
+      error(formatPath(issue.path), isMissing(value, issue.path) ? "必須です" : issue.message);
+    }
+    return { errors, warnings };
+  }
 
-  const doc = value as EventFile;
+  const doc = parsed.data;
   const tagDefinitions = doc.tag_definitions ?? {};
   const ids = new Set<string>();
   const claimId = (path: string, id: string) => {
@@ -112,5 +136,5 @@ export function validateEvent(value: unknown): ValidationResult {
     }
   });
 
-  return { errors, warnings };
+  return errors.length > 0 ? { errors, warnings } : { errors, warnings, doc };
 }

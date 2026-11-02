@@ -20,7 +20,7 @@ pnpm dev
 
 ## イベントデータ
 
-タイムテーブルは `events/<event-id>.json` に1イベント1ファイルで置く。形式は [docs/SPEC.md](docs/SPEC.md#イベントデータ) と [JSON Schema](schema/v1/event.schema.json)（https://mt.whyk.dev/schema/v1/event.schema.json でも配信）を参照。
+タイムテーブルは `events/<event-id>.json` に1イベント1ファイルで置く。形式は [docs/SPEC.md](docs/SPEC.md#イベントデータ) と [JSON Schema](schema/v1/event.schema.json)（https://mt.whyk.dev/schema/v1/event.schema.json でも配信）を参照。スキーマの定義元は Zod で書いた [schema/v1/event.ts](schema/v1/event.ts) で、JSON Schema はそこから生成している。
 
 ## スクリプト
 
@@ -33,6 +33,7 @@ pnpm dev
 | `pnpm fmt` / `pnpm fmt:check` | Oxfmt による整形 / 整形のチェック                 |
 | `pnpm test`                   | Vitest によるテスト                               |
 | `pnpm validate`               | イベントデータ（`events/*.json`）の整合チェック   |
+| `pnpm schema`                 | Zod の定義から JSON Schema を生成する             |
 
 ## ライセンス
 
