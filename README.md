@@ -20,14 +20,14 @@ pnpm dev
 
 ## スクリプト
 
-| コマンド | 内容 |
-| --- | --- |
-| `pnpm dev` | 開発サーバー（Worker を本番に近い環境で動かす） |
-| `pnpm build` | ビルド |
-| `pnpm preview` | ビルドして、ビルド結果を手元で確認する |
+| コマンド                      | 内容                                              |
+| ----------------------------- | ------------------------------------------------- |
+| `pnpm dev`                    | 開発サーバー（Worker を本番に近い環境で動かす）   |
+| `pnpm build`                  | ビルド                                            |
+| `pnpm preview`                | ビルドして、ビルド結果を手元で確認する            |
 | `pnpm lint` / `pnpm lint:fix` | Oxlint による lint（型チェックを含む） / 自動修正 |
-| `pnpm fmt` / `pnpm fmt:check` | Oxfmt による整形 / 整形のチェック |
-| `pnpm test` | Vitest によるテスト |
+| `pnpm fmt` / `pnpm fmt:check` | Oxfmt による整形 / 整形のチェック                 |
+| `pnpm test`                   | Vitest によるテスト                               |
 
 ## ライセンス
 

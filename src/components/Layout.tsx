@@ -10,7 +10,10 @@ export const Layout: FC<PropsWithChildren<{ title?: string }>> = ({ title, child
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-      <meta name="description" content="フェスやカンファレンスのタイムテーブルから、自分だけのマイテーブルを作る非公式ツール" />
+      <meta
+        name="description"
+        content="フェスやカンファレンスのタイムテーブルから、自分だけのマイテーブルを作る非公式ツール"
+      />
       {/* 非公式ツールのため、検索エンジンには載せない */}
       <meta name="robots" content="noindex" />
       <title>{title ? `${title} | ${SITE_NAME}` : SITE_NAME}</title>
