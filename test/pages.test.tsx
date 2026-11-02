@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import app from "../src/index.tsx";
+import { loadEvents } from "../scripts/lib/load-events.ts";
+import { createApp } from "../src/app.tsx";
+import { fixturesDir } from "./helpers.ts";
+
+const app = createApp(loadEvents(fixturesDir).data);
+const emptyApp = createApp({ index: [], events: {} });
 
 describe("TOP ページ", () => {
   it("HTML を返す", async () => {
@@ -17,6 +22,32 @@ describe("TOP ページ", () => {
   it("フッターにコピーライトがある", async () => {
     const body = await (await app.request("/")).text();
     expect(body).toContain("© 2026 WhyK");
+  });
+
+  it("公開イベントを新しい順に並べ、非公開イベントは出さない", async () => {
+    const body = await (await app.request("/")).text();
+    const fes = body.indexOf('href="/e/example-fes-2026"');
+    const conf = body.indexOf('href="/e/older-conf-2026"');
+    expect(fes).toBeGreaterThan(-1);
+    expect(conf).toBeGreaterThan(fes);
+    expect(body).toContain("2026年12月5日（土）〜12月6日（日）");
+    expect(body).not.toContain("secret-meetup-2026");
+  });
+
+  it("公開イベントがなければその旨を出す", async () => {
+    const body = await (await emptyApp.request("/")).text();
+    expect(body).toContain("公開中のイベントはまだありません。");
+  });
+});
+
+describe("JSON Schema の配信", () => {
+  it("イベントデータのスキーマを返す", async () => {
+    const res = await app.request("/schema/v1/event.schema.json");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("application/json");
+    expect(res.headers.get("access-control-allow-origin")).toBe("*");
+    const schema = (await res.json()) as { $id: string };
+    expect(schema.$id).toBe("https://mt.whyk.dev/schema/v1/event.schema.json");
   });
 });
 

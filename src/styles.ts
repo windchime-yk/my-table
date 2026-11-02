@@ -83,6 +83,42 @@ export const heading = css`
   font-size: 1.1rem;
 `;
 
+export const eventList = css`
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+export const eventCard = css`
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  text-decoration: none;
+
+  &:hover {
+    border-color: var(--accent);
+  }
+`;
+
+export const eventName = css`
+  font-weight: 700;
+`;
+
+export const eventDates = css`
+  color: var(--muted);
+  font-size: 0.9rem;
+`;
+
+export const empty = css`
+  margin: 0;
+  color: var(--muted);
+`;
+
 export const steps = css`
   display: grid;
   gap: 8px;

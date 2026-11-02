@@ -1,0 +1,20 @@
+{
+  "schema_version": "1",
+  "id": "older-conf-2026",
+  "visibility": "public",
+  "event": { "name": "Older Conf 2026", "timezone": "Asia/Tokyo" },
+  "days": [
+    {
+      "date": "2026-04-18",
+      "stages": [
+        {
+          "id": "hall",
+          "name": "Hall",
+          "slots": [
+            { "id": "o-1000", "start": "10:00", "end": "10:30", "end_source": "explicit", "title": "Opening", "category": "ceremony" }
+          ]
+        }
+      ]
+    }
+  ]
+}

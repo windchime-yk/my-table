@@ -1,0 +1,104 @@
+{
+  "$schema": "https://mt.whyk.dev/schema/v1/event.schema.json",
+  "schema_version": "1",
+  "id": "example-fes-2026",
+  "visibility": "public",
+  "event": {
+    "name": "Example Fes 2026",
+    "venue": "Example Hall",
+    "timezone": "Asia/Tokyo",
+    "official_url": "https://example.com/",
+    "sources": ["公式タイムテーブル画像"]
+  },
+  "tag_definitions": { "no_photo": "撮影禁止" },
+  "days": [
+    {
+      "date": "2026-12-05",
+      "label": "DAY1",
+      "end_time": "21:00",
+      "day_events": [
+        { "start": "12:00", "end": "12:30", "title": "開場", "kind": "doors" },
+        { "start": "15:00", "end": "15:30", "title": "休憩", "kind": "break", "stages": ["sub"] }
+      ],
+      "stages": [
+        {
+          "id": "main",
+          "name": "Main STAGE",
+          "color": "oklch(70% 0.15 30)",
+          "slots": [
+            {
+              "id": "d1-main-1230",
+              "start": "12:30",
+              "end": "13:00",
+              "end_source": "explicit",
+              "title": "Artist A",
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-main-1300",
+              "start": "13:00",
+              "end": "13:30",
+              "end_source": "inferred",
+              "title": "Artist B",
+              "kind_label": "DJ",
+              "category": "performance",
+              "simulcast_in": ["sub"]
+            },
+            {
+              "id": "d1-main-2330",
+              "start": "23:30",
+              "end": "24:30",
+              "end_source": "explicit",
+              "title": "Late Night Set",
+              "category": "performance"
+            }
+          ]
+        },
+        {
+          "id": "sub",
+          "name": "Sub STAGE",
+          "closed": [{ "start": "14:00", "end": "14:30" }],
+          "slots": [
+            {
+              "id": "d1-sub-1230",
+              "start": "12:30",
+              "end": "13:00",
+              "end_source": "explicit",
+              "title": null,
+              "kind_label": "10分セッション",
+              "category": "talk",
+              "items": [
+                { "id": "talk-1", "title": "Talk 1", "speakers": ["Speaker 1"] },
+                { "id": "talk-2", "title": "Talk 2", "speakers": ["Speaker 2"] }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-12-06",
+      "label": "DAY2",
+      "stages": [
+        {
+          "id": "main",
+          "name": "Main STAGE",
+          "slots": [
+            {
+              "id": "d2-main-1200",
+              "start": "12:00",
+              "end": "12:45",
+              "end_source": "explicit",
+              "title": "Keynote",
+              "speakers": ["Speaker 3"],
+              "category": "keynote",
+              "note": "10分押し（公式告知 12/06 11:50）"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
