@@ -3,4 +3,6 @@
   "name": "my-table",
   "main": "src/index.tsx",
   "compatibility_date": "2026-10-23",
+  // main 以外のブランチは Workers Builds が `wrangler preview` でプレビューを作る。プレビュー専用の設定はないので空
+  "previews": {},
 }
