@@ -1,28 +1,31 @@
 import { css } from "hono/css";
 
-/** 全体テーマ。色は CSS 変数で定義し、ダーク・ライトを OS の設定に合わせて切り替える */
+/**
+ * 全体テーマ。色は CSS 変数で定義し、ダーク・ライトを OS の設定に合わせて切り替える。
+ * 色は OKLCH（明度・彩度・色相）で書く。無彩色寄りの色は色相を 255 にそろえる
+ */
 export const globalClass = css`
   :-hono-global {
     :root {
-      --bg: #0d0f12;
-      --surface: #171a1f;
-      --ink: #f2f4f7;
-      --muted: #9aa3ad;
-      --line: #2a2f36;
-      --accent: #9be22d;
-      --accent-ink: #0d0f12;
+      --bg: oklch(16.8% 0.007 255);
+      --surface: oklch(21.7% 0.011 255);
+      --ink: oklch(96.6% 0.005 255);
+      --muted: oklch(71.1% 0.018 255);
+      --line: oklch(30.3% 0.014 255);
+      --accent: oklch(83.5% 0.21 130);
+      --accent-ink: oklch(16.8% 0.007 255);
       color-scheme: dark;
     }
 
     @media (prefers-color-scheme: light) {
       :root {
-        --bg: #f6f7f9;
-        --surface: #ffffff;
-        --ink: #14171a;
-        --muted: #5d6670;
-        --line: #dde1e6;
-        --accent: #4d8a00;
-        --accent-ink: #ffffff;
+        --bg: oklch(97.6% 0.003 255);
+        --surface: oklch(100% 0 0);
+        --ink: oklch(20.3% 0.008 255);
+        --muted: oklch(50.6% 0.019 255);
+        --line: oklch(90.8% 0.008 255);
+        --accent: oklch(56.9% 0.162 133);
+        --accent-ink: oklch(100% 0 0);
         color-scheme: light;
       }
     }
