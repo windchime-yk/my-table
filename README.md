@@ -28,20 +28,6 @@ pnpm dev
 | `pnpm lint` / `pnpm lint:fix` | Oxlint による lint（型チェックを含む） / 自動修正 |
 | `pnpm fmt` / `pnpm fmt:check` | Oxfmt による整形 / 整形のチェック |
 | `pnpm test` | Vitest によるテスト |
-| `pnpm deploy` | ビルドして手元から直接デプロイする |
-
-## デプロイ
-
-Cloudflare の Workers Builds が、main への push をきっかけにビルドしてデプロイする。デプロイの経路を2つにすると互いに上書きし合うので、ほかの方法と併用しない。
-
-Workers Builds の設定（Cloudflare ダッシュボードの Worker の設定 → ビルド で、このリポジトリを接続する）:
-
-| 項目 | 値 |
-| --- | --- |
-| ビルドコマンド | `pnpm test && pnpm build` |
-| デプロイコマンド | `pnpm wrangler deploy` |
-
-フォークして使う場合は、自分の Cloudflare アカウントの Workers Builds にリポジトリを接続する。Worker 名は `wrangler.jsonc` の `name` で変えられる。
 
 ## ライセンス
 
