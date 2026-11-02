@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # package.json の packageManager と .node-version を読んで、pnpm と Node.js を入れ、pnpm install まで行う
+      - uses: pnpm/setup@v3
+        with:
+          cache: true
+      - run: pnpm fmt:check
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
