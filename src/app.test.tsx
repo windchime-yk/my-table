@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { loadEvents } from "../scripts/lib/load-events.ts";
-import { createApp } from "../src/app.tsx";
-import { fixturesDir } from "./helpers.ts";
+import { createApp } from "./app.tsx";
+import { fixturesDir } from "../scripts/lib/fixtures.ts";
 
 const app = createApp(loadEvents(fixturesDir).data);
 const emptyApp = createApp({ index: [], events: {} });

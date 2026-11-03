@@ -2,8 +2,8 @@ import { copyFileSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { loadEvents } from "../scripts/lib/load-events.ts";
-import { fixturesDir } from "./helpers.ts";
+import { loadEvents } from "./load-events.ts";
+import { fixturesDir } from "./fixtures.ts";
 
 const tempDir = () => mkdtempSync(join(tmpdir(), "my-table-events-"));
 

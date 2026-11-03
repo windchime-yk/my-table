@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateRange } from "../src/shared/date.ts";
+import { formatDateRange } from "./date.ts";
 
 describe("formatDateRange", () => {
   it("1日だけ", () => {

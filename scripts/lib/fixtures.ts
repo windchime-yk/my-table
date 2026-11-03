@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import type { EventFile } from "../src/shared/event.ts";
+import type { EventFile } from "../../src/shared/event.ts";
 
 export const fixturesDir = fileURLToPath(new URL("./fixtures/events", import.meta.url));
 
