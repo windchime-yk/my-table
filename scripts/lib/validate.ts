@@ -32,12 +32,17 @@ const formatPath = (path: PropertyKey[]): string => {
   return out || "(ルート)";
 };
 
+const isRecord = (v: unknown): v is Record<PropertyKey, unknown> => typeof v === "object" && v !== null;
+
 /** その場所に項目がない（Zod は「型が違う」と報告するので、必須項目の欠落として言い直すため） */
 const isMissing = (value: unknown, path: PropertyKey[]): boolean => {
   if (path.length === 0) return false;
   let parent = value;
-  for (const key of path.slice(0, -1)) parent = (parent as Record<PropertyKey, unknown>)?.[key];
-  return typeof parent === "object" && parent !== null && !(path[path.length - 1] in parent);
+  for (const key of path.slice(0, -1)) {
+    if (!isRecord(parent)) return false;
+    parent = parent[key];
+  }
+  return isRecord(parent) && !(path[path.length - 1] in parent);
 };
 
 export function validateEvent(value: unknown): ValidationResult {

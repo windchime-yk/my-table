@@ -14,7 +14,7 @@ const parts = (date: string) => {
  */
 export function formatDateRange(dates: string[]): string {
   if (dates.length === 0) return "";
-  const sorted = [...dates].sort();
+  const sorted = dates.toSorted();
   const first = sorted[0];
   const last = sorted[sorted.length - 1];
   const a = parts(first);

@@ -15,7 +15,7 @@ describe("loadEvents", () => {
       { id: "example-fes-2026", name: "Example Fes 2026", dates: ["2026-12-05", "2026-12-06"] },
       { id: "older-conf-2026", name: "Older Conf 2026", dates: ["2026-04-18"] },
     ]);
-    expect(Object.keys(data.events).sort()).toEqual(["example-fes-2026", "older-conf-2026"]);
+    expect(Object.keys(data.events).toSorted()).toEqual(["example-fes-2026", "older-conf-2026"]);
   });
 
   it("$schema と visibility は同梱せず、元の JSON から作ったバージョンを付ける", () => {

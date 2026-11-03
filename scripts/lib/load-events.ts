@@ -29,7 +29,7 @@ export function checkFile(path: string): CheckedFile {
       path,
       doc: null,
       raw,
-      errors: [`${name}: JSON として読めません（${(e as Error).message}）`],
+      errors: [`${name}: JSON として読めません（${e instanceof Error ? e.message : String(e)}）`],
       warnings: [],
     };
   }
@@ -49,7 +49,7 @@ export function listEventFiles(dir: string): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
     .filter((f) => f.endsWith(".json"))
-    .sort()
+    .toSorted()
     .map((f) => join(dir, f));
 }
 

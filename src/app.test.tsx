@@ -46,8 +46,8 @@ describe("JSON Schema の配信", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("application/json");
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
-    const schema = (await res.json()) as { $id: string };
-    expect(schema.$id).toBe("https://mt.whyk.dev/schema/v1/event.schema.json");
+    const schema: unknown = await res.json();
+    expect(schema).toMatchObject({ $id: "https://mt.whyk.dev/schema/v1/event.schema.json" });
   });
 });
 
