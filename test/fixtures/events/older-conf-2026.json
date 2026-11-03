@@ -11,7 +11,14 @@
           "id": "hall",
           "name": "Hall",
           "slots": [
-            { "id": "o-1000", "start": "10:00", "end": "10:30", "end_source": "explicit", "title": "Opening", "category": "ceremony" }
+            {
+              "id": "o-1000",
+              "start": "10:00",
+              "end": "10:30",
+              "end_source": "explicit",
+              "title": "Opening",
+              "category": "ceremony"
+            }
           ]
         }
       ]

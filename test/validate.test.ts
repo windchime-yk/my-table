@@ -96,13 +96,17 @@ describe("validateEvent: 項目をまたぐ規則", () => {
   it("同時中継先の枠と重なってもエラー", () => {
     const doc = validEvent();
     doc.days[0].stages[1].slots[0].end = "13:15";
-    expect(errorsOf(doc)).toEqual(['days[0] ステージ "sub": 「10分セッション」と「Artist B（中継）」の時間が重なっています']);
+    expect(errorsOf(doc)).toEqual([
+      'days[0] ステージ "sub": 「10分セッション」と「Artist B（中継）」の時間が重なっています',
+    ]);
   });
 
   it("クローズの時間帯と重なるとエラー", () => {
     const doc = validEvent();
     doc.days[0].stages[1].closed = [{ start: "12:45", end: "13:30" }];
-    expect(errorsOf(doc)).toContain('days[0] ステージ "sub": 「10分セッション」と「クローズ（12:45-13:30）」の時間が重なっています');
+    expect(errorsOf(doc)).toContain(
+      'days[0] ステージ "sub": 「10分セッション」と「クローズ（12:45-13:30）」の時間が重なっています',
+    );
   });
 
   it("存在しないステージを参照するとエラー", () => {

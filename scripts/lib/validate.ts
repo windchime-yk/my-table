@@ -131,7 +131,8 @@ export function validateEvent(value: unknown): ValidationResult {
       for (let i = 1; i < spans.length; i++) {
         const prev = spans[i - 1];
         const cur = spans[i];
-        if (prev.end > cur.start) error(`${dp} ステージ "${stage}"`, `「${prev.what}」と「${cur.what}」の時間が重なっています`);
+        if (prev.end > cur.start)
+          error(`${dp} ステージ "${stage}"`, `「${prev.what}」と「${cur.what}」の時間が重なっています`);
       }
     }
   });

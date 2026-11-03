@@ -39,7 +39,8 @@ const slot = z
     start: time,
     end: time,
     end_source: z.enum(["explicit", "next_slot", "inferred", "day_end"]).meta({
-      description: "終了時刻の根拠。explicit 公式に記載 / next_slot 次の枠と連続 / inferred 推定 / day_end 終演時刻から",
+      description:
+        "終了時刻の根拠。explicit 公式に記載 / next_slot 次の枠と連続 / inferred 推定 / day_end 終演時刻から",
     }),
     title: text.nullable().meta({ description: "枠の名前。items がある枠だけ null にできる" }),
     category: z.enum(["performance", "talk", "keynote", "workshop", "ceremony", "other"]),
@@ -88,10 +89,7 @@ const day = z
     date,
     label: optionalText.meta({ description: "表示名（例: DAY1）" }),
     end_time: time.nullish().meta({ description: "終演時刻" }),
-    day_events: z
-      .array(dayEvent)
-      .optional()
-      .meta({ description: "開場・休憩・懇親会など、選択の対象にしない時間帯" }),
+    day_events: z.array(dayEvent).optional().meta({ description: "開場・休憩・懇親会など、選択の対象にしない時間帯" }),
     stages: z.array(stage).min(1),
   })
   .meta({ id: "day" });

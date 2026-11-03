@@ -25,7 +25,13 @@ export function checkFile(path: string): CheckedFile {
   try {
     value = JSON.parse(raw);
   } catch (e) {
-    return { path, doc: null, raw, errors: [`${name}: JSON として読めません（${(e as Error).message}）`], warnings: [] };
+    return {
+      path,
+      doc: null,
+      raw,
+      errors: [`${name}: JSON として読めません（${(e as Error).message}）`],
+      warnings: [],
+    };
   }
   const result = validateEvent(value);
   const errors = result.errors.map((m) => `${name}: ${m}`);
