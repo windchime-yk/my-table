@@ -1,15 +1,50 @@
 import { cx } from "hono/css";
 import type { FC } from "hono/jsx";
 import { Layout } from "../components/Layout.tsx";
-import { heading, lead, main, notes, section, step, steps, title, wrap } from "../styles.ts";
+import { formatDateRange } from "../shared/date.ts";
+import type { EventSummary } from "../shared/event.ts";
+import {
+  empty,
+  eventCard,
+  eventDates,
+  eventList,
+  eventName,
+  heading,
+  lead,
+  main,
+  notes,
+  section,
+  step,
+  steps,
+  title,
+  wrap,
+} from "../styles.ts";
 
-export const Top: FC = () => (
+export const Top: FC<{ events: EventSummary[] }> = ({ events }) => (
   <Layout>
     <main class={cx(wrap, main)}>
       <h1 class={title}>マイテーブル</h1>
       <p class={lead}>
         フェスやカンファレンスのタイムテーブルから、見たい枠を選んで自分だけのタイムテーブルを作るツールです。
       </p>
+
+      <section class={section}>
+        <h2 class={heading}>イベント</h2>
+        {events.length > 0 ? (
+          <ul class={eventList}>
+            {events.map((e) => (
+              <li>
+                <a class={eventCard} href={`/e/${e.id}`}>
+                  <span class={eventName}>{e.name}</span>
+                  <span class={eventDates}>{formatDateRange(e.dates)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class={empty}>公開中のイベントはまだありません。</p>
+        )}
+      </section>
 
       <section class={section}>
         <h2 class={heading}>使い方</h2>
