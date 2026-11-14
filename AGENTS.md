@@ -46,7 +46,9 @@ scripts/lib/                  整合チェックとデータの読み込み（�
 scripts/vite-plugin-events.ts events/ をチェックして Worker に同梱する Vite プラグイン
 src/app.tsx                   Hono のアプリ（createApp にイベントデータを渡す）
 src/index.tsx                 Worker の入口
-src/pages/ src/components/    画面（hono/jsx）
+src/pages/ src/components/    サーバーが返す画面（hono/jsx）
+src/client/                   ブラウザ側の画面（hono/jsx/dom）。入口は main.tsx
+src/domain/                   時刻・選べる単位などのロジック（純粋な関数。DOM に依存しない）
 src/shared/                   型と、サーバー・ブラウザの両方で使う関数
 src/styles.ts                 hono/css のスタイルとテーマ
 docs/SPEC.md                  設計・データの流れ・スキーマ・データ作成の指針
@@ -55,7 +57,8 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 ## 技術の決定
 
 - **実行環境**: Cloudflare Workers 上の Hono。ビルドは Vite ＋ `@cloudflare/vite-plugin`。HonoX・Void は使わない
-- **画面**: サーバーは hono/jsx、ブラウザ側の操作は hono/jsx/dom。React などは入れない
+- **画面**: サーバーは hono/jsx、ブラウザ側の操作は hono/jsx/dom。React などは入れない。ブラウザ側のファイルは先頭に `/** @jsxImportSource hono/jsx/dom */` を書き、スタイルは `hono/jsx/dom/css` を使う
+- **ブラウザ側のビルド**: Vite の `client` 環境で `src/client/main.tsx` をビルドし、Worker の静的アセット（`/static/client.js`）として配信する。Worker が先にビルドされるのでファイル名は固定。開発サーバーでは `/src/client/main.tsx` を直接読み込む
 - **スタイル**: hono/css。クラスの組み合わせは必ず `cx()` を使う（テンプレート文字列でつなぐとサーバー側で `document is not defined` になる）
 - **色**: OKLCH で書く。テーマの色は `src/styles.ts` の CSS 変数にまとめ、無彩色寄りの色は色相 255 にそろえる。データのステージ色も OKLCH
 - **パッケージ管理**: pnpm（`packageManager` に正確なバージョン）。Bun は使わない。依存のビルドスクリプトは `pnpm-workspace.yaml` の `allowBuilds` で許可する

@@ -173,3 +173,26 @@ export const footerInner = css`
   justify-content: space-between;
   gap: 8px;
 `;
+
+/** イベントページ。見出しまでの余白を TOP より詰める（スマホで枠が早く見えるように） */
+export const eventMain = css`
+  padding-block: 20px 56px;
+`;
+
+export const backLink = css`
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+`;
+
+export const eventAbout = css`
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+
+  & p {
+    margin: 0 0 8px;
+  }
+`;

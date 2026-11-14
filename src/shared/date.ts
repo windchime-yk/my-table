@@ -24,3 +24,9 @@ export function formatDateRange(dates: string[]): string {
   const tail = `${b.y === a.y ? "" : `${b.y}年`}${b.m}月${b.d}日（${weekday(last)}）`;
   return `${head}〜${tail}`;
 }
+
+/** 「10/31(土)」の形にする。日付のチップなど、幅の狭いところに使う */
+export function shortDate(date: string): string {
+  const { m, d } = parts(date);
+  return `${m}/${d}(${weekday(date)})`;
+}
