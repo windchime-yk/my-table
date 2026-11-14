@@ -7,6 +7,8 @@ import { isEventPayload } from "./shared/payload.ts";
 const app = createApp(loadEvents(fixturesDir).data);
 const emptyApp = createApp({ index: [], events: {} });
 
+const get = async (path: string) => (await app.request(path)).text();
+
 describe("TOP ページ", () => {
   it("HTML を返す", async () => {
     const res = await app.request("/");
@@ -42,8 +44,6 @@ describe("TOP ページ", () => {
 });
 
 describe("イベントページ", () => {
-  const get = async (path: string) => (await app.request(path)).text();
-
   it("イベント名・会場と、noindex の指定を出す", async () => {
     const res = await app.request("/e/example-fes-2026");
     expect(res.status).toBe(200);
