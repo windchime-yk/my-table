@@ -122,6 +122,26 @@ export const warning = css`
   font-size: 0.9rem;
 `;
 
+/** 閉じられる知らせ。右に閉じるボタンの余白を取る */
+export const notice = css`
+  position: relative;
+  padding-right: 44px;
+  border-color: var(--warn);
+`;
+
+export const noticeClose = css`
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+`;
+
 // ---------- ステージの絞り込み ----------
 
 /** 数が多いときは横にスクロールする */

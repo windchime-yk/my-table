@@ -38,13 +38,24 @@ const dayIndexFromUrl = (doc: EventDoc): number =>
     nowInZone(doc.event.timezone, new Date())?.date ?? null,
   );
 
-export const App: FC<{ doc: EventDoc; initialSelected: string[] }> = ({ doc, initialSelected }) => {
+export interface AppProps {
+  doc: EventDoc;
+  /** 開いたときの選択（保存してあったものを、今のデータに合わせたもの） */
+  initialSelected: string[];
+  /** 開いたときに出す知らせ（データの更新で外れた枠があったとき）。なければ null */
+  initialNotice: string | null;
+  /** 開いたときの保存し直しに失敗したか */
+  initialSaveFailed: boolean;
+}
+
+export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initialSaveFailed }) => {
   const [dayIndex, setDayIndex] = useState(() => dayIndexFromUrl(doc));
   const [view, setView] = useState<View>("all");
   /** 絞り込むステージ。null は「すべて」 */
   const [stageFilter, setStageFilter] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState(initialSelected);
-  const [saveFailed, setSaveFailed] = useState(false);
+  const [notice, setNotice] = useState(initialNotice);
+  const [saveFailed, setSaveFailed] = useState(initialSaveFailed);
 
   const dayNavRef = useRef<HTMLElement>(null);
 
@@ -137,6 +148,14 @@ export const App: FC<{ doc: EventDoc; initialSelected: string[] }> = ({ doc, ini
         </button>
       </nav>
 
+      {notice ? (
+        <p class={cx(s.warning, s.notice)} role="status">
+          {notice}
+          <button type="button" class={s.noticeClose} aria-label="閉じる" onClick={() => setNotice(null)}>
+            ×
+          </button>
+        </p>
+      ) : null}
       {saveFailed ? (
         <p class={s.warning} role="status">
           このブラウザでは選択を保存できませんでした（プライベートブラウズなど）。ページを閉じると選択は消えます。

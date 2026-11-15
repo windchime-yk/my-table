@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { fixturesDir } from "../../scripts/lib/fixtures.ts";
 import { loadEvents } from "../../scripts/lib/load-events.ts";
-import { buildStored, parseStored, selectableIds, storageKey, toggleSelected } from "./selection.ts";
+import { buildStored, parseStored, reconcile, selectableIds, storageKey, toggleSelected } from "./selection.ts";
 
 describe("storageKey", () => {
   it("イベントごとのキーにする", () => {
@@ -56,5 +56,42 @@ describe("selectableIds", () => {
     expect(ids.has("talk-1")).toBe(true);
     expect(ids.has("d2-main-1200")).toBe(true);
     expect(ids.has("d1-sub-1230")).toBe(false);
+  });
+});
+
+describe("reconcile", () => {
+  const valid = new Set(["a1", "b2", "c3"]);
+  const stored = (version: string, selected: string[]) => ({ version, selected, updatedAt: "" });
+
+  it("なくなった単位だけを外し、外れた件数を返す", () => {
+    expect(reconcile(stored("v1", ["a1", "gone", "b2"]), "v2", valid)).toEqual({
+      selected: ["a1", "b2"],
+      removed: 1,
+      versionChanged: true,
+    });
+  });
+
+  it("重複を除く。重複は外れた件数に数えない", () => {
+    expect(reconcile(stored("v1", ["a1", "a1", "gone", "gone"]), "v2", valid)).toEqual({
+      selected: ["a1"],
+      removed: 1,
+      versionChanged: true,
+    });
+  });
+
+  it("バージョンが変わっても、単位が残っていれば選択はそのまま", () => {
+    expect(reconcile(stored("v1", ["c3", "a1"]), "v2", valid)).toEqual({
+      selected: ["c3", "a1"],
+      removed: 0,
+      versionChanged: true,
+    });
+  });
+
+  it("同じバージョンなら versionChanged は false", () => {
+    expect(reconcile(stored("v2", ["a1"]), "v2", valid).versionChanged).toBe(false);
+  });
+
+  it("保存がなければ、何も選んでいない状態", () => {
+    expect(reconcile(null, "v2", valid)).toEqual({ selected: [], removed: 0, versionChanged: false });
   });
 });
