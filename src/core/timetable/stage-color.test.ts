@@ -15,7 +15,7 @@ describe("stageColor", () => {
     expect(stageColor({}, DEFAULT_STAGE_COLORS.length)).toBe(DEFAULT_STAGE_COLORS[0]);
   });
 
-  it("既定の色は OKLCH で書く", () => {
-    for (const color of DEFAULT_STAGE_COLORS) expect(color).toMatch(/^oklch\(/);
+  it.each(DEFAULT_STAGE_COLORS)("既定の色 %s は OKLCH で書く", (color) => {
+    expect(color).toMatch(/^oklch\(/);
   });
 });

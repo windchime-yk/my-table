@@ -1,4 +1,4 @@
-import type { Stage } from "../shared/event.ts";
+import type { Stage } from "../../shared/event.ts";
 
 /** データに色がないステージへ、並び順で割り当てる既定の色（OKLCH） */
 export const DEFAULT_STAGE_COLORS = [

@@ -1,6 +1,6 @@
 // 選べる単位。利用者がマイテーブルに入れる1件で、枠そのものか、ブロック（items のある枠）の中のトーク1本
 
-import type { Day, Item, Slot, Stage } from "../shared/event.ts";
+import type { Day, Item, Slot, Stage } from "../../shared/event.ts";
 import { formatMinutes, toMinutes } from "./time.ts";
 
 /** 出演者名やステージ名を並べるときの区切り。中黒（・）は、端末のフォントによって太い黒丸に見えるので使わない */

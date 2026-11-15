@@ -1,7 +1,7 @@
 // 選択の読み書き。localStorage は使えない・消えることがある前提で、失敗しても落ちないようにする
 // （プライベートブラウズや、サイトデータを保存しない設定では、触るだけで例外になることがある）
 
-import { buildStored, parseStored, storageKey, type Stored } from "../domain/selection.ts";
+import { buildStored, parseStored, storageKey, type Stored } from "../core/my-table/selection.ts";
 
 type StorageLike = Pick<Storage, "getItem" | "setItem">;
 

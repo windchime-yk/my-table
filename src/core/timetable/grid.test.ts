@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Day } from "../shared/event.ts";
+import type { Day } from "../../shared/event.ts";
 import {
   closedBox,
   gridBox,

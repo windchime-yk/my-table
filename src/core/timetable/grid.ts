@@ -1,6 +1,6 @@
 // 横並び表示（ステージを列、時間を縦軸にした表示）の位置の計算
 
-import type { Day } from "../shared/event.ts";
+import type { Day } from "../../shared/event.ts";
 import type { ListRow } from "./list.ts";
 import { toMinutes } from "./time.ts";
 import { unitsForDay } from "./unit.ts";

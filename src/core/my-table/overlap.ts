@@ -1,6 +1,6 @@
 // 選んだ単位どうしの時間の重なり
 
-import type { Unit } from "./unit.ts";
+import type { Unit } from "../timetable/unit.ts";
 
 export interface Overlap {
   /** 重なっている相手 */

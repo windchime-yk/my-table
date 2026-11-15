@@ -1,6 +1,6 @@
 // 表示する日の選び方と、イベントのタイムゾーンでの現在時刻
 
-import type { Day } from "../shared/event.ts";
+import type { Day } from "../../shared/event.ts";
 import { toMinutes } from "./time.ts";
 
 /** イベントのタイムゾーンでの、いまの日付と時刻 */

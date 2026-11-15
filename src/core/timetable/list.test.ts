@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Day } from "../shared/event.ts";
+import type { Day } from "../../shared/event.ts";
 import { listGroups } from "./list.ts";
 
 const day: Day = {

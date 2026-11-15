@@ -24,9 +24,7 @@ describe("formatMinutes", () => {
     expect(formatMinutes(1470)).toBe("24:30");
   });
 
-  it("toMinutes と行き来できる", () => {
-    for (const time of ["00:00", "12:30", "23:59", "25:15"]) {
-      expect(formatMinutes(toMinutes(time))).toBe(time);
-    }
+  it.each(["00:00", "12:30", "23:59", "25:15"])("%s を toMinutes と行き来できる", (time) => {
+    expect(formatMinutes(toMinutes(time))).toBe(time);
   });
 });

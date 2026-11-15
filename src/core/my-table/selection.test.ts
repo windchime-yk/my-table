@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { fixturesDir } from "../../scripts/lib/fixtures.ts";
-import { loadEvents } from "../../scripts/lib/load-events.ts";
+import { fixturesDir } from "../../../scripts/lib/fixtures.ts";
+import { loadEvents } from "../../../scripts/lib/load-events.ts";
 import { buildStored, parseStored, reconcile, selectableIds, storageKey, toggleSelected } from "./selection.ts";
 
 describe("storageKey", () => {
