@@ -253,6 +253,12 @@ export const flag = css`
   font-size: 0.75rem;
 `;
 
+/** 時間の重なりなどの注意 */
+export const flagWarn = css`
+  border-color: var(--warn);
+  color: var(--warn);
+`;
+
 export const check = css`
   position: absolute;
   top: 50%;

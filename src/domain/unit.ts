@@ -53,3 +53,8 @@ export function timeLabel(unit: Pick<Unit, "start" | "end" | "endExplicit">): st
   const start = formatMinutes(unit.start);
   return unit.endExplicit ? `${start}–${formatMinutes(unit.end)}` : start;
 }
+
+/** 表示用の名前。ブロックの中のトークはトークのタイトル、枠は枠の名前（なければ元の表記） */
+export function unitTitle(unit: Pick<Unit, "slot" | "item">): string {
+  return unit.item ? unit.item.title : (unit.slot.title ?? unit.slot.kind_label ?? "");
+}
