@@ -541,6 +541,14 @@ export const action = css`
   cursor: pointer;
 `;
 
+/** いちばん使ってほしい操作 */
+export const actionPrimary = css`
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  text-decoration: none;
+`;
+
 /** 取り消しにくい操作は、目立たせない */
 export const actionGhost = css`
   background: none;
@@ -566,4 +574,30 @@ export const note = css`
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.8rem;
+`;
+
+// ---------- 画像のプレビュー ----------
+
+export const dialog = css`
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+`;
+
+export const dialogText = css`
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+`;
+
+export const dialogImage = css`
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 8px 0 12px;
+  border-radius: 8px;
 `;

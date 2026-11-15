@@ -22,6 +22,7 @@ import { formatMinutes, toMinutes } from "../domain/time.ts";
 import { timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
 import { shortDate } from "../shared/date.ts";
 import type { Day, DayEvent, EventDoc } from "../shared/event.ts";
+import { renderMyTable } from "./image.ts";
 import { saveSelection } from "./storage.ts";
 import * as s from "./styles.ts";
 
@@ -96,6 +97,14 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
   const [wide, setWide] = useState(() => window.matchMedia(WIDE_QUERY).matches);
   const dayNavRef = useRef<HTMLElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  /** 作った画像（プレビューのダイアログに出す）。なければ null */
+  const [image, setImage] = useState<{ url: string; filename: string } | null>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // 画像ができたら、プレビューのダイアログを開く
+  useEffect(() => {
+    if (image) dialogRef.current?.showModal();
+  }, [image]);
 
   // 画面の幅が変わったら（端末の回転、ウィンドウの大きさの変更）、表示を切り替える
   useEffect(() => {
@@ -186,6 +195,22 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
     }
   };
 
+  /** 表示している日のマイテーブルを画像にして、プレビューを出す */
+  const saveImage = async () => {
+    try {
+      const blob = await renderMyTable({ doc, day, units: mine, overlaps });
+      setImage({ url: URL.createObjectURL(blob), filename: `my-table-${doc.id}-${day.date}.png` });
+    } catch {
+      setNotice({ warn: true, text: "画像を作れませんでした。" });
+    }
+  };
+
+  /** ダイアログが閉じたら、画像を片付ける */
+  const closeImage = () => {
+    if (image) URL.revokeObjectURL(image.url);
+    setImage(null);
+  };
+
   const clearAll = () => {
     if (confirm("マイテーブルの選択を、すべての日の分まとめて解除します。よろしいですか？")) update([]);
   };
@@ -271,6 +296,9 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
           units={mine}
           selection={selection}
           hasAnySelection={selectedIds.length > 0}
+          onImage={() => {
+            void saveImage();
+          }}
           onExport={exportFile}
           onImport={() => fileRef.current?.click()}
           onClear={clearAll}
@@ -295,6 +323,21 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
           void importFile();
         }}
       />
+
+      {image ? (
+        <dialog ref={dialogRef} class={s.dialog} onClose={closeImage}>
+          <p class={s.dialogText}>スマホでは、画像を長押しすると写真に保存できます。</p>
+          <img class={s.dialogImage} src={image.url} alt="マイテーブルの画像" />
+          <div class={s.actions}>
+            <a class={cx(s.action, s.actionPrimary)} href={image.url} download={image.filename}>
+              ダウンロード
+            </a>
+            <button type="button" class={s.action} onClick={() => dialogRef.current?.close()}>
+              閉じる
+            </button>
+          </div>
+        </dialog>
+      ) : null}
     </>
   );
 };
@@ -642,12 +685,18 @@ const MineView: FC<{
   selection: Selection;
   /** ほかの日も含めて、何か選んでいるか */
   hasAnySelection: boolean;
+  onImage: () => void;
   onExport: () => void;
   onImport: () => void;
   onClear: () => void;
-}> = ({ doc, units, selection, hasAnySelection, onExport, onImport, onClear }) => (
+}> = ({ doc, units, selection, hasAnySelection, onImage, onExport, onImport, onClear }) => (
   <div class={cx(s.stack, s.mineColumn)}>
     <div class={s.actions}>
+      {units.length > 0 ? (
+        <button type="button" class={cx(s.action, s.actionPrimary)} onClick={onImage}>
+          画像で保存
+        </button>
+      ) : null}
       <button type="button" class={s.action} onClick={onExport}>
         ファイルに書き出す
       </button>
@@ -666,7 +715,7 @@ const MineView: FC<{
       <p class={s.emptyBox}>まだ何も選んでいません。「タイムテーブル」で見たい枠をタップしてください。</p>
     )}
     <p class={s.note}>
-      選んだ枠はこのブラウザにだけ保存され、サーバーには送信しません。控えを取るときや、別の端末・ブラウザに移すときは、ファイルに書き出して読み込んでください。
+      選んだ枠はこのブラウザにだけ保存され、サーバーには送信しません。控えを取るときや、別の端末・ブラウザに移すときは、ファイルに書き出して読み込んでください。当日は電波が弱いこともあるので、表示している日の分を画像で保存しておくと安心です。
     </p>
   </div>
 );
