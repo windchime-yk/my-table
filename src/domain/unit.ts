@@ -3,6 +3,9 @@
 import type { Day, Item, Slot, Stage } from "../shared/event.ts";
 import { formatMinutes, toMinutes } from "./time.ts";
 
+/** 出演者名やステージ名を並べるときの区切り。中黒（・）は、端末のフォントによって太い黒丸に見えるので使わない */
+export const NAME_SEPARATOR = " / ";
+
 export interface Unit {
   /** 選択の保存に使う ID。枠の id か、トークの id */
   id: string;

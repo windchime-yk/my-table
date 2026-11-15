@@ -3,7 +3,7 @@
 import type { Overlap } from "../domain/overlap.ts";
 import { stageColor } from "../domain/stage-color.ts";
 import { formatMinutes } from "../domain/time.ts";
-import { unitTitle, type Unit } from "../domain/unit.ts";
+import { NAME_SEPARATOR, unitTitle, type Unit } from "../domain/unit.ts";
 import { wrapText } from "../domain/wrap-text.ts";
 import { shortDate } from "../shared/date.ts";
 import type { Day, EventDoc } from "../shared/event.ts";
@@ -83,7 +83,7 @@ export function renderMyTable({ doc, day, units, overlaps }: ImageInput): Promis
       [slot.kind_label, order ? `${order.index}/${order.total}本目` : null].filter(Boolean).join(" "),
       item ? null : slot.subtitle,
       slot.note,
-      speakers?.join("・"),
+      speakers?.join(NAME_SEPARATOR),
     ].filter(Boolean);
     const flagParts = (slot.tags ?? []).map((tag) => doc.tag_definitions?.[tag] ?? tag);
     const unitOverlaps = overlaps.get(unit.id) ?? [];

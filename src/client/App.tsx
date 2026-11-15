@@ -19,7 +19,7 @@ import { findOverlaps, type Overlap } from "../domain/overlap.ts";
 import { selectableIds, toggleSelected } from "../domain/selection.ts";
 import { stageColor } from "../domain/stage-color.ts";
 import { formatMinutes, toMinutes } from "../domain/time.ts";
-import { timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
+import { NAME_SEPARATOR, timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
 import { shortDate } from "../shared/date.ts";
 import type { Day, DayEvent, EventDoc } from "../shared/event.ts";
 import { renderMyTable } from "./image.ts";
@@ -405,7 +405,7 @@ const ListView: FC<{ doc: EventDoc; day: Day; groups: ListGroup[]; selection: Se
 /** 開場・休憩など */
 const DayEventRow: FC<{ day: Day; dayEvent: DayEvent }> = ({ day, dayEvent }) => {
   const where = dayEvent.stages?.length
-    ? dayEvent.stages.map((id) => day.stages.find((stage) => stage.id === id)?.name ?? id).join("・")
+    ? dayEvent.stages.map((id) => day.stages.find((stage) => stage.id === id)?.name ?? id).join(NAME_SEPARATOR)
     : "全体";
   return (
     <p class={s.dayEvent}>
@@ -467,7 +467,7 @@ const UnitCard: FC<{ doc: EventDoc; unit: Unit; selection: Selection }> = ({ doc
   const on = selection.selected.has(unit.id);
   const kind = [slot.kind_label, order ? `${order.index}/${order.total}本目` : null].filter(Boolean).join(" · ");
   const speakers = item ? item.speakers : slot.speakers;
-  const sub = [item ? null : slot.subtitle, slot.note, speakers?.join("・")].filter(Boolean);
+  const sub = [item ? null : slot.subtitle, slot.note, speakers?.join(NAME_SEPARATOR)].filter(Boolean);
   return (
     <button
       type="button"
@@ -515,7 +515,9 @@ const BlockCard: FC<{ doc: EventDoc; row: ListRow; selection: Selection }> = ({ 
             onClick={() => selection.toggle(unit.id)}
           >
             <span class={s.talkTitle}>{unitTitle(unit)}</span>
-            {unit.item?.speakers?.length ? <span class={s.cardSub}>{unit.item.speakers.join("・")}</span> : null}
+            {unit.item?.speakers?.length ? (
+              <span class={s.cardSub}>{unit.item.speakers.join(NAME_SEPARATOR)}</span>
+            ) : null}
             <OverlapFlags overlaps={selection.overlaps.get(unit.id)} />
             <Check on={on} />
           </button>
@@ -623,7 +625,7 @@ const GridCard: FC<{ doc: EventDoc; unit: Unit; selection: Selection }> = ({ doc
   const { slot } = unit;
   const on = selection.selected.has(unit.id);
   const title = unitTitle(unit);
-  const sub = [slot.subtitle, slot.note, slot.speakers?.join("・")].filter(Boolean);
+  const sub = [slot.subtitle, slot.note, slot.speakers?.join(NAME_SEPARATOR)].filter(Boolean);
   return (
     <button
       type="button"
