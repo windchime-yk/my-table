@@ -2,7 +2,7 @@
 import type { FC } from "hono/jsx";
 import { useEffect, useMemo, useRef, useState } from "hono/jsx";
 import { cx } from "hono/jsx/dom/css";
-import { nowInZone, pickDayIndex } from "../domain/day.ts";
+import { currentDayDate, nowInZone, nowMinutesForDay, pickDayIndex } from "../domain/day.ts";
 import { buildExport, parseImport } from "../domain/export-file.ts";
 import {
   gridBox,
@@ -19,7 +19,7 @@ import { findOverlaps, type Overlap } from "../domain/overlap.ts";
 import { selectableIds, toggleSelected } from "../domain/selection.ts";
 import { stageColor } from "../domain/stage-color.ts";
 import { formatMinutes, toMinutes } from "../domain/time.ts";
-import { NAME_SEPARATOR, timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
+import { isRunning, NAME_SEPARATOR, timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
 import { shortDate } from "../shared/date.ts";
 import type { Day, DayEvent, EventDoc } from "../shared/event.ts";
 import { renderMyTable } from "./image.ts";
@@ -29,11 +29,13 @@ import * as s from "./styles.ts";
 /** all: タイムテーブル / mine: マイテーブル */
 type View = "all" | "mine";
 
-/** 枠の選択。選んでいる ID、選んだ単位どうしの重なり、選ぶ・外すの切り替え */
-interface Selection {
+/** 枠のカードを描くのに使うもの。選んでいる ID、重なり、いまの時刻、選ぶ・外すの切り替え */
+interface CardContext {
   selected: Set<string>;
   /** 表示している日の、選んだ単位どうしの時間の重なり（単位の ID ごと） */
   overlaps: Map<string, Overlap[]>;
+  /** いまの時刻（表示している日の 0:00 からの分）。表示している日が「いま」でなければ null */
+  nowMinutes: number | null;
   toggle: (id: string) => void;
 }
 
@@ -72,7 +74,7 @@ const dayIndexFromUrl = (doc: EventDoc): number =>
   pickDayIndex(
     doc.days,
     new URLSearchParams(location.search).get("day"),
-    nowInZone(doc.event.timezone, new Date())?.date ?? null,
+    currentDayDate(doc.days, nowInZone(doc.event.timezone, new Date())),
   );
 
 export interface AppProps {
@@ -95,7 +97,20 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
   const [saveFailed, setSaveFailed] = useState(initialSaveFailed);
 
   const [wide, setWide] = useState(() => window.matchMedia(WIDE_QUERY).matches);
+  /** いまの時刻（分単位に切り捨てた、1970年からの分）。分が変わったときだけ描き直す */
+  const [clock, setClock] = useState(() => Math.floor(Date.now() / 60_000));
   const dayNavRef = useRef<HTMLElement>(null);
+
+  // 進行中の表示を1分ごとに更新する。画面を表示し直したとき（スマホのスリープ明けなど）もすぐ合わせる
+  useEffect(() => {
+    const tick = () => setClock(Math.floor(Date.now() / 60_000));
+    const timer = setInterval(tick, 15_000);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", tick);
+    };
+  }, []);
   const fileRef = useRef<HTMLInputElement>(null);
   /** 作った画像（プレビューのダイアログに出す）。なければ null */
   const [image, setImage] = useState<{ url: string; filename: string } | null>(null);
@@ -134,6 +149,15 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
   /** 表示している日のマイテーブル（時刻順） */
   const mine = useMemo(() => unitsForDay(day).filter((unit) => selected.has(unit.id)), [day, selected]);
   const overlaps = useMemo(() => findOverlaps(mine), [mine]);
+  // 時刻はすべてイベントのタイムゾーンで判定する（閲覧者の端末のタイムゾーンには左右されない）
+  const nowMinutes = useMemo(
+    () => nowMinutesForDay(day, nowInZone(doc.event.timezone, new Date(clock * 60_000))),
+    [day, doc, clock],
+  );
+  /** 「いまへ」を出すか。タイムテーブルを表示していて、いまがその日の表示範囲に入っているとき */
+  const range = useMemo(() => gridRange(day), [day]);
+  const canJumpToNow =
+    view === "all" && nowMinutes !== null && range !== null && range.from <= nowMinutes && nowMinutes <= range.to;
   /** 日ごとの選んだ件数。日付のチップに出す */
   const countByDay = useMemo(
     () => doc.days.map((d) => unitsForDay(d).filter((unit) => selected.has(unit.id)).length),
@@ -214,7 +238,7 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
   const clearAll = () => {
     if (confirm("マイテーブルの選択を、すべての日の分まとめて解除します。よろしいですか？")) update([]);
   };
-  const selection: Selection = { selected, overlaps, toggle };
+  const ctx: CardContext = { selected, overlaps, nowMinutes, toggle };
 
   const switchView = (next: View) => {
     setView(next);
@@ -229,6 +253,11 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
     const url = new URL(location.href);
     url.searchParams.set("day", doc.days[index].date);
     history.pushState(null, "", url);
+  };
+
+  /** 現在時刻の位置までスクロールする。リストでは「いま」を含む時刻のまとまり、横並びでは現在時刻の線 */
+  const jumpToNow = () => {
+    document.querySelector("[data-now]")?.scrollIntoView({ block: wide ? "center" : "start", behavior: "smooth" });
   };
 
   /** 横並び表示にするか。スマホ（狭い画面）とマイテーブルはリストのまま */
@@ -294,7 +323,7 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
         <MineView
           doc={doc}
           units={mine}
-          selection={selection}
+          ctx={ctx}
           hasAnySelection={selectedIds.length > 0}
           onImage={() => {
             void saveImage();
@@ -307,12 +336,18 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
         <>
           <StageChips day={day} stageId={stageId} onChange={setStageFilter} />
           {grid ? (
-            <GridView doc={doc} day={day} stageId={stageId} selection={selection} />
+            <GridView doc={doc} day={day} stageId={stageId} ctx={ctx} />
           ) : (
-            <ListView doc={doc} day={day} groups={groups} selection={selection} />
+            <ListView doc={doc} day={day} groups={groups} ctx={ctx} />
           )}
         </>
       )}
+
+      {canJumpToNow ? (
+        <button type="button" class={s.nowButton} onClick={jumpToNow}>
+          いまへ
+        </button>
+      ) : null}
 
       <input
         ref={fileRef}
@@ -374,25 +409,27 @@ const StageChips: FC<{ day: Day; stageId: string | null; onChange: (stageId: str
 
 // ---------- タイムテーブル（リスト） ----------
 
-const ListView: FC<{ doc: EventDoc; day: Day; groups: ListGroup[]; selection: Selection }> = ({
-  doc,
-  day,
-  groups,
-  selection,
-}) =>
+/** 「いまへ」の行き先にする、時刻のまとまりの開始時刻。いま以前で最後に始まったまとまり（なければ最初のまとまり） */
+function nowGroupStart(groups: ListGroup[], nowMinutes: number | null): number | null {
+  if (nowMinutes === null) return null;
+  const started = groups.filter((group) => group.start <= nowMinutes);
+  return (started.at(-1) ?? groups[0])?.start ?? null;
+}
+
+const ListView: FC<{ doc: EventDoc; day: Day; groups: ListGroup[]; ctx: CardContext }> = ({ doc, day, groups, ctx }) =>
   groups.length > 0 ? (
     <div>
       {groups.map((group) => (
-        <section class={s.group}>
+        <section class={s.group} data-now={group.start === nowGroupStart(groups, ctx.nowMinutes) ? "true" : undefined}>
           <h2 class={s.groupTime}>{formatMinutes(group.start)}</h2>
           {group.dayEvents.map((dayEvent) => (
             <DayEventRow day={day} dayEvent={dayEvent} />
           ))}
           {group.rows.map((row) =>
             row.slot.items ? (
-              <BlockCard doc={doc} row={row} selection={selection} />
+              <BlockCard doc={doc} row={row} ctx={ctx} />
             ) : (
-              row.units.map((unit) => <UnitCard doc={doc} unit={unit} selection={selection} />)
+              row.units.map((unit) => <UnitCard doc={doc} unit={unit} ctx={ctx} />)
             ),
           )}
         </section>
@@ -451,6 +488,9 @@ const OverlapFlags: FC<{ overlaps: Overlap[] | undefined }> = ({ overlaps }) => 
   );
 };
 
+/** 進行中の印 */
+const Live: FC = () => <span class={s.live}>進行中</span>;
+
 /** 選んでいるかの印 */
 const Check: FC<{ on: boolean }> = ({ on }) => (
   <span class={cx(s.check, on && s.checkOn)} aria-hidden="true">
@@ -462,43 +502,51 @@ const Check: FC<{ on: boolean }> = ({ on }) => (
  * 選べる単位1つのカード。タップで選ぶ・外す。
  * ブロックの中のトークも、マイテーブルではこのカードで出す（何本目かを添える）
  */
-const UnitCard: FC<{ doc: EventDoc; unit: Unit; selection: Selection }> = ({ doc, unit, selection }) => {
+const UnitCard: FC<{ doc: EventDoc; unit: Unit; ctx: CardContext }> = ({ doc, unit, ctx }) => {
   const { slot, item, order } = unit;
-  const on = selection.selected.has(unit.id);
+  const on = ctx.selected.has(unit.id);
+  const running = isRunning(unit, ctx.nowMinutes);
   const kind = [slot.kind_label, order ? `${order.index}/${order.total}本目` : null].filter(Boolean).join(" · ");
   const speakers = item ? item.speakers : slot.speakers;
   const sub = [item ? null : slot.subtitle, slot.note, speakers?.join(NAME_SEPARATOR)].filter(Boolean);
   return (
     <button
       type="button"
-      class={cx(s.card, s.cardButton, on && s.cardOn)}
+      class={cx(s.card, s.cardButton, on && s.cardOn, running && s.cardLive)}
       aria-pressed={pressed(on)}
       style={stageStyle(stageColor(unit.stage, unit.stageIndex))}
-      onClick={() => selection.toggle(unit.id)}
+      onClick={() => ctx.toggle(unit.id)}
     >
       <span class={s.cardHead}>
         <span class={s.cardTime}>{timeLabel(unit)}</span>
+        {running ? <Live /> : null}
         <span class={s.cardStage}>{unit.stage.name}</span>
         {kind ? <span class={s.muted}>{kind}</span> : null}
       </span>
       <span class={s.cardTitle}>{unitTitle(unit)}</span>
       {sub.length > 0 ? <span class={s.cardSub}>{sub.join(" · ")}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
-      <OverlapFlags overlaps={selection.overlaps.get(unit.id)} />
+      <OverlapFlags overlaps={ctx.overlaps.get(unit.id)} />
       <Check on={on} />
     </button>
   );
 };
 
 /** ブロック。1つの枠に、個別の開始時刻なしで複数のトークが入っている。トーク1本ずつを選ぶ */
-const BlockCard: FC<{ doc: EventDoc; row: ListRow; selection: Selection }> = ({ doc, row, selection }) => {
+const BlockCard: FC<{ doc: EventDoc; row: ListRow; ctx: CardContext }> = ({ doc, row, ctx }) => {
   const { slot, units } = row;
   const first = units[0];
+  // ブロックの中のトークには個別の時刻がないので、進行中かは枠の時間で判定する
+  const running = isRunning(first, ctx.nowMinutes);
   const heading = [slot.title, slot.kind_label].filter(Boolean).join(" · ");
   return (
-    <div class={cx(s.card, s.block)} style={stageStyle(stageColor(first.stage, first.stageIndex))}>
+    <div
+      class={cx(s.card, s.block, running && s.cardLive)}
+      style={stageStyle(stageColor(first.stage, first.stageIndex))}
+    >
       <span class={s.cardHead}>
         <span class={s.cardTime}>{timeLabel(first)}</span>
+        {running ? <Live /> : null}
         <span class={s.cardStage}>{first.stage.name}</span>
         {heading ? <span class={s.muted}>{heading}</span> : null}
       </span>
@@ -506,19 +554,19 @@ const BlockCard: FC<{ doc: EventDoc; row: ListRow; selection: Selection }> = ({ 
       {slot.note ? <span class={s.cardSub}>{slot.note}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
       {units.map((unit) => {
-        const on = selection.selected.has(unit.id);
+        const on = ctx.selected.has(unit.id);
         return (
           <button
             type="button"
             class={cx(s.talk, on && s.cardOn)}
             aria-pressed={pressed(on)}
-            onClick={() => selection.toggle(unit.id)}
+            onClick={() => ctx.toggle(unit.id)}
           >
             <span class={s.talkTitle}>{unitTitle(unit)}</span>
             {unit.item?.speakers?.length ? (
               <span class={s.cardSub}>{unit.item.speakers.join(NAME_SEPARATOR)}</span>
             ) : null}
-            <OverlapFlags overlaps={selection.overlaps.get(unit.id)} />
+            <OverlapFlags overlaps={ctx.overlaps.get(unit.id)} />
             <Check on={on} />
           </button>
         );
@@ -532,11 +580,11 @@ const BlockCard: FC<{ doc: EventDoc; row: ListRow; selection: Selection }> = ({ 
 /** 位置と高さを style の文字列にする */
 const boxStyle = (box: { top: number; height: number }) => `top:${box.top}px;height:${box.height}px`;
 
-const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; selection: Selection }> = ({
+const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; ctx: CardContext }> = ({
   doc,
   day,
   stageId,
-  selection,
+  ctx,
 }) => {
   const range = gridRange(day);
   if (!range) return <p class={s.empty}>この日の枠はまだありません。</p>;
@@ -569,6 +617,11 @@ const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; selection:
 
         {/* 全ステージ共通の開場・休憩などは、列をまたぐ帯にする */}
         <div class={s.gridLayer}>
+          {ctx.nowMinutes !== null && range.from <= ctx.nowMinutes && ctx.nowMinutes <= range.to ? (
+            <div class={s.gridNow} data-now="true" style={`top:${gridOffset(range, ctx.nowMinutes)}px`}>
+              <span class={s.gridNowLabel}>{formatMinutes(ctx.nowMinutes)}</span>
+            </div>
+          ) : null}
           {dayEvents
             .filter((dayEvent) => !dayEvent.stages?.length)
             .map((dayEvent) => {
@@ -605,11 +658,7 @@ const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; selection:
               const first = row.units[0];
               return (
                 <div class={s.gridSlot} style={boxStyle(gridBox(range, first.start, first.end))}>
-                  {row.slot.items ? (
-                    <GridBlock row={row} selection={selection} />
-                  ) : (
-                    <GridCard doc={doc} unit={first} selection={selection} />
-                  )}
+                  {row.slot.items ? <GridBlock row={row} ctx={ctx} /> : <GridCard doc={doc} unit={first} ctx={ctx} />}
                 </div>
               );
             })}
@@ -621,27 +670,29 @@ const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; selection:
 };
 
 /** 横並び表示の枠。高さは枠の時間で決まるので、収まらない分は隠す（全文は title で読める） */
-const GridCard: FC<{ doc: EventDoc; unit: Unit; selection: Selection }> = ({ doc, unit, selection }) => {
+const GridCard: FC<{ doc: EventDoc; unit: Unit; ctx: CardContext }> = ({ doc, unit, ctx }) => {
   const { slot } = unit;
-  const on = selection.selected.has(unit.id);
+  const on = ctx.selected.has(unit.id);
+  const running = isRunning(unit, ctx.nowMinutes);
   const title = unitTitle(unit);
   const sub = [slot.subtitle, slot.note, slot.speakers?.join(NAME_SEPARATOR)].filter(Boolean);
   return (
     <button
       type="button"
-      class={cx(s.card, s.cardButton, s.gridCard, on && s.cardOn)}
+      class={cx(s.card, s.cardButton, s.gridCard, on && s.cardOn, running && s.cardLive)}
       aria-pressed={pressed(on)}
       title={title}
-      onClick={() => selection.toggle(unit.id)}
+      onClick={() => ctx.toggle(unit.id)}
     >
       <span class={s.cardHead}>
         <span class={s.cardTime}>{timeLabel(unit)}</span>
+        {running ? <Live /> : null}
         {slot.kind_label ? <span class={s.muted}>{slot.kind_label}</span> : null}
       </span>
       <span class={cx(s.cardTitle, s.gridCardTitle)}>{title}</span>
       {sub.length > 0 ? <span class={cx(s.cardSub, s.oneLine)}>{sub.join(" · ")}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
-      <OverlapFlags overlaps={selection.overlaps.get(unit.id)} />
+      <OverlapFlags overlaps={ctx.overlaps.get(unit.id)} />
       <span class={cx(s.check, s.checkSmall, on && s.checkOn)} aria-hidden="true">
         {on ? "✓" : "+"}
       </span>
@@ -650,14 +701,18 @@ const GridCard: FC<{ doc: EventDoc; unit: Unit; selection: Selection }> = ({ doc
 };
 
 /** 横並び表示のブロック。トーク1本ずつを1行で出し、収まらないときは中でスクロールする */
-const GridBlock: FC<{ row: ListRow; selection: Selection }> = ({ row, selection }) => {
+const GridBlock: FC<{ row: ListRow; ctx: CardContext }> = ({ row, ctx }) => {
   const { slot, units } = row;
   const heading = [timeLabel(units[0]), slot.title, slot.kind_label].filter(Boolean).join(" · ");
+  const running = isRunning(units[0], ctx.nowMinutes);
   return (
-    <div class={cx(s.card, s.gridBlock)}>
-      <span class={cx(s.cardHead, s.muted)}>{heading}</span>
+    <div class={cx(s.card, s.gridBlock, running && s.cardLive)}>
+      <span class={cx(s.cardHead, s.muted)}>
+        {heading}
+        {running ? <Live /> : null}
+      </span>
       {units.map((unit) => {
-        const on = selection.selected.has(unit.id);
+        const on = ctx.selected.has(unit.id);
         const title = unitTitle(unit);
         return (
           <button
@@ -665,7 +720,7 @@ const GridBlock: FC<{ row: ListRow; selection: Selection }> = ({ row, selection 
             class={cx(s.talk, s.gridTalk, on && s.cardOn)}
             aria-pressed={pressed(on)}
             title={title}
-            onClick={() => selection.toggle(unit.id)}
+            onClick={() => ctx.toggle(unit.id)}
           >
             <span class={cx(s.talkTitle, s.oneLine)}>{title}</span>
             <span class={cx(s.check, s.checkMini, on && s.checkOn)} aria-hidden="true">
@@ -684,14 +739,14 @@ const MineView: FC<{
   doc: EventDoc;
   /** 表示している日の、選んだ単位 */
   units: Unit[];
-  selection: Selection;
+  ctx: CardContext;
   /** ほかの日も含めて、何か選んでいるか */
   hasAnySelection: boolean;
   onImage: () => void;
   onExport: () => void;
   onImport: () => void;
   onClear: () => void;
-}> = ({ doc, units, selection, hasAnySelection, onImage, onExport, onImport, onClear }) => (
+}> = ({ doc, units, ctx, hasAnySelection, onImage, onExport, onImport, onClear }) => (
   <div class={cx(s.stack, s.mineColumn)}>
     <div class={s.actions}>
       {units.length > 0 ? (
@@ -712,7 +767,7 @@ const MineView: FC<{
       ) : null}
     </div>
     {units.length > 0 ? (
-      units.map((unit) => <UnitCard doc={doc} unit={unit} selection={selection} />)
+      units.map((unit) => <UnitCard doc={doc} unit={unit} ctx={ctx} />)
     ) : (
       <p class={s.emptyBox}>まだ何も選んでいません。「タイムテーブル」で見たい枠をタップしてください。</p>
     )}

@@ -182,10 +182,12 @@ export const chipOn = css`
 
 // ---------- リスト ----------
 
+/** scroll-margin-top は、「いまへ」で移動したときに、上に固定した表示の切り替えに隠れないための余白 */
 export const group = css`
   display: grid;
   gap: 8px;
   padding: 12px 0;
+  scroll-margin-top: 64px;
 `;
 
 export const groupTime = css`
@@ -236,6 +238,21 @@ export const cardButton = css`
 export const cardOn = css`
   border-color: var(--stage, var(--accent));
   background: color-mix(in oklch, var(--stage, var(--accent)) 16%, var(--surface));
+`;
+
+/** 進行中の枠。枠線を強調する */
+export const cardLive = css`
+  box-shadow: 0 0 0 2px var(--accent);
+`;
+
+/** 進行中の印 */
+export const live = css`
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.7rem;
+  font-weight: 700;
 `;
 
 export const cardHead = css`
@@ -438,6 +455,30 @@ export const gridLayer = css`
   pointer-events: none;
 `;
 
+/** 現在時刻の線。枠より手前に出す */
+export const gridNow = css`
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--accent);
+`;
+
+export const gridNowLabel = css`
+  position: absolute;
+  top: -10px;
+  right: 0;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+`;
+
 /** 全ステージ共通の開場・休憩などの帯 */
 export const gridBand = css`
   position: absolute;
@@ -600,4 +641,23 @@ export const dialogImage = css`
   height: auto;
   margin: 8px 0 12px;
   border-radius: 8px;
+`;
+
+// ---------- 当日の表示 ----------
+
+/** 「いまへ」。画面の右下に固定し、枠や上に固定した見出しより手前に出す（枠の下に隠れないように） */
+export const nowButton = css`
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 10;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: inherit;
+  font-weight: 700;
+  box-shadow: 0 4px 16px oklch(0% 0 0 / 0.35);
+  cursor: pointer;
 `;
