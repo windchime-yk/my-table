@@ -1,7 +1,7 @@
 /** @jsxImportSource hono/jsx/dom */
 import type { FC } from "hono/jsx";
 import { css, cx } from "hono/jsx/dom/css";
-import { stageColor } from "../../domain/stage-color.ts";
+import { stageColor } from "../../core/timetable/stage-color.ts";
 import type { Day } from "../../shared/event.ts";
 import { pressed, stageStyle } from "../ui.ts";
 

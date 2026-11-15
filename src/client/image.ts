@@ -1,10 +1,10 @@
 // マイテーブルを1枚の画像（PNG）にする。当日、電波が悪くても見られる控え用
 
-import type { Overlap } from "../domain/overlap.ts";
-import { stageColor } from "../domain/stage-color.ts";
-import { formatMinutes } from "../domain/time.ts";
-import { NAME_SEPARATOR, unitTitle, type Unit } from "../domain/unit.ts";
-import { wrapText } from "../domain/wrap-text.ts";
+import type { Overlap } from "../core/my-table/overlap.ts";
+import { stageColor } from "../core/timetable/stage-color.ts";
+import { formatMinutes } from "../core/timetable/time.ts";
+import { NAME_SEPARATOR, unitTitle, type Unit } from "../core/timetable/unit.ts";
+import { wrapText } from "../core/image/wrap-text.ts";
 import { shortDate } from "../shared/date.ts";
 import type { Day, EventDoc } from "../shared/event.ts";
 

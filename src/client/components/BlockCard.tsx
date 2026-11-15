@@ -1,12 +1,13 @@
 /** @jsxImportSource hono/jsx/dom */
 import type { FC } from "hono/jsx";
 import { css, cx } from "hono/jsx/dom/css";
-import type { ListRow } from "../../domain/list.ts";
-import { stageColor } from "../../domain/stage-color.ts";
-import { isRunning, NAME_SEPARATOR, timeLabel, unitTitle } from "../../domain/unit.ts";
+import type { ListRow } from "../../core/timetable/list.ts";
+import { stageColor } from "../../core/timetable/stage-color.ts";
+import { isRunning, NAME_SEPARATOR, timeLabel, unitTitle } from "../../core/timetable/unit.ts";
 import type { EventDoc } from "../../shared/event.ts";
 import { Check, Live, Order, OverlapFlags, Relay, Tags } from "./marks.tsx";
 import { type CardContext, pressed, stageStyle } from "../ui.ts";
+import { card, cardOn, cardLive, cardHead, cardTime, cardStage, cardSub, talk, talkTitle } from "./card-styles.ts";
 import * as s from "../styles.ts";
 
 const block = css`
@@ -26,15 +27,15 @@ export const BlockCard: FC<{ doc: EventDoc; row: ListRow; ctx: CardContext }> = 
   const running = isRunning(first, ctx.nowMinutes);
   const heading = [slot.title, slot.kind_label].filter(Boolean).join(" · ");
   return (
-    <div class={cx(s.card, block, running && s.cardLive)} style={stageStyle(stageColor(first.stage, first.stageIndex))}>
-      <span class={s.cardHead}>
-        <span class={s.cardTime}>{timeLabel(first)}</span>
+    <div class={cx(card, block, running && cardLive)} style={stageStyle(stageColor(first.stage, first.stageIndex))}>
+      <span class={cardHead}>
+        <span class={cardTime}>{timeLabel(first)}</span>
         {running ? <Live /> : null}
-        <span class={s.cardStage}>{first.stage.name}</span>
+        <span class={cardStage}>{first.stage.name}</span>
         {heading ? <span class={s.muted}>{heading}</span> : null}
       </span>
       <span class={blockNote}>各トークの開始時刻は公開されていません。順番のみ表示しています。</span>
-      {slot.note ? <span class={s.cardSub}>{slot.note}</span> : null}
+      {slot.note ? <span class={cardSub}>{slot.note}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
       <Relay unit={first} />
       {units.map((unit) => {
@@ -42,16 +43,16 @@ export const BlockCard: FC<{ doc: EventDoc; row: ListRow; ctx: CardContext }> = 
         return (
           <button
             type="button"
-            class={cx(s.talk, on && s.cardOn)}
+            class={cx(talk, on && cardOn)}
             aria-pressed={pressed(on)}
             onClick={() => ctx.toggle(unit.id)}
           >
-            <span class={s.talkTitle}>
+            <span class={talkTitle}>
               <Order unit={unit} />
               {unitTitle(unit)}
             </span>
             {unit.item?.speakers?.length ? (
-              <span class={s.cardSub}>{unit.item.speakers.join(NAME_SEPARATOR)}</span>
+              <span class={cardSub}>{unit.item.speakers.join(NAME_SEPARATOR)}</span>
             ) : null}
             <OverlapFlags overlaps={ctx.overlaps.get(unit.id)} />
             <Check on={on} />

@@ -1,7 +1,7 @@
 // マイテーブルの書き出しファイル。ログインがない代わりの、控えと別の端末への移行の手段
 
 import { z } from "zod";
-import type { EventDoc } from "../shared/event.ts";
+import type { EventDoc } from "../../shared/event.ts";
 import { reconcile, selectedIdsSchema } from "./selection.ts";
 
 export const FILE_FORMAT = "my-table";

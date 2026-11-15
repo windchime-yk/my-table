@@ -1,6 +1,6 @@
 // ブラウザ側の画面で共通に使う型と、小さな関数
 
-import type { Overlap } from "../domain/overlap.ts";
+import type { Overlap } from "../core/my-table/overlap.ts";
 
 /** all: タイムテーブル / mine: マイテーブル */
 export type View = "all" | "mine";

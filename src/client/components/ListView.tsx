@@ -1,9 +1,9 @@
 /** @jsxImportSource hono/jsx/dom */
 import type { FC } from "hono/jsx";
 import { css } from "hono/jsx/dom/css";
-import type { ListGroup } from "../../domain/list.ts";
-import { formatMinutes } from "../../domain/time.ts";
-import { NAME_SEPARATOR } from "../../domain/unit.ts";
+import type { ListGroup } from "../../core/timetable/list.ts";
+import { formatMinutes } from "../../core/timetable/time.ts";
+import { NAME_SEPARATOR } from "../../core/timetable/unit.ts";
 import type { Day, DayEvent, EventDoc } from "../../shared/event.ts";
 import { BlockCard } from "./BlockCard.tsx";
 import { UnitCard } from "./UnitCard.tsx";

@@ -1,7 +1,7 @@
 /** @jsxImportSource hono/jsx/dom */
 import type { FC } from "hono/jsx";
 import { css, cx } from "hono/jsx/dom/css";
-import type { Unit } from "../../domain/unit.ts";
+import type { Unit } from "../../core/timetable/unit.ts";
 import type { EventDoc } from "../../shared/event.ts";
 import { UnitCard } from "./UnitCard.tsx";
 import type { CardContext } from "../ui.ts";

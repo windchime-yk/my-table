@@ -1,6 +1,6 @@
 // リスト表示の組み立て。1日分を開始時刻ごとにまとめ、開場・休憩などの day_events も同じ時刻の位置に入れる
 
-import type { Day, DayEvent, Slot } from "../shared/event.ts";
+import type { Day, DayEvent, Slot } from "../../shared/event.ts";
 import { toMinutes } from "./time.ts";
 import { unitsForDay, type Unit } from "./unit.ts";
 

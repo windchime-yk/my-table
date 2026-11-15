@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Day } from "../shared/event.ts";
+import type { Day } from "../../shared/event.ts";
 import { currentDayDate, nowInZone, nowMinutesForDay, pickDayIndex } from "./day.ts";
 
 const days = [{ date: "2026-10-31" }, { date: "2026-11-01" }, { date: "2026-11-02" }];

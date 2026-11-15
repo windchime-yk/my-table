@@ -1,11 +1,22 @@
 /** @jsxImportSource hono/jsx/dom */
 import type { FC } from "hono/jsx";
 import { cx } from "hono/jsx/dom/css";
-import { stageColor } from "../../domain/stage-color.ts";
-import { isRunning, NAME_SEPARATOR, timeLabel, unitTitle, type Unit } from "../../domain/unit.ts";
+import { stageColor } from "../../core/timetable/stage-color.ts";
+import { isRunning, NAME_SEPARATOR, timeLabel, unitTitle, type Unit } from "../../core/timetable/unit.ts";
 import type { EventDoc } from "../../shared/event.ts";
 import { Check, Live, OverlapFlags, Relay, Tags } from "./marks.tsx";
 import { type CardContext, pressed, stageStyle } from "../ui.ts";
+import {
+  card,
+  cardButton,
+  cardOn,
+  cardLive,
+  cardHead,
+  cardTime,
+  cardStage,
+  cardTitle,
+  cardSub,
+} from "./card-styles.ts";
 import * as s from "../styles.ts";
 
 /**
@@ -22,19 +33,19 @@ export const UnitCard: FC<{ doc: EventDoc; unit: Unit; ctx: CardContext }> = ({ 
   return (
     <button
       type="button"
-      class={cx(s.card, s.cardButton, on && s.cardOn, running && s.cardLive)}
+      class={cx(card, cardButton, on && cardOn, running && cardLive)}
       aria-pressed={pressed(on)}
       style={stageStyle(stageColor(unit.stage, unit.stageIndex))}
       onClick={() => ctx.toggle(unit.id)}
     >
-      <span class={s.cardHead}>
-        <span class={s.cardTime}>{timeLabel(unit)}</span>
+      <span class={cardHead}>
+        <span class={cardTime}>{timeLabel(unit)}</span>
         {running ? <Live /> : null}
-        <span class={s.cardStage}>{unit.stage.name}</span>
+        <span class={cardStage}>{unit.stage.name}</span>
         {kind ? <span class={s.muted}>{kind}</span> : null}
       </span>
-      <span class={s.cardTitle}>{unitTitle(unit)}</span>
-      {sub.length > 0 ? <span class={s.cardSub}>{sub.join(" · ")}</span> : null}
+      <span class={cardTitle}>{unitTitle(unit)}</span>
+      {sub.length > 0 ? <span class={cardSub}>{sub.join(" · ")}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
       <Relay unit={unit} />
       <OverlapFlags overlaps={ctx.overlaps.get(unit.id)} />

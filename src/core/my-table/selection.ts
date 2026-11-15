@@ -1,8 +1,8 @@
 // 利用者の選択（マイテーブル）。選べる単位の ID を並べたもので、ブラウザの localStorage にだけ保存する
 
 import { z } from "zod";
-import type { EventDoc } from "../shared/event.ts";
-import { unitsForDay } from "./unit.ts";
+import type { EventDoc } from "../../shared/event.ts";
+import { unitsForDay } from "../timetable/unit.ts";
 
 /** 選んだ単位の ID の並び。重複は取り除く */
 export const selectedIdsSchema = z.array(z.string()).transform((ids) => [...new Set(ids)]);

@@ -1,8 +1,8 @@
 /** @jsxImportSource hono/jsx/dom */
 import type { FC } from "hono/jsx";
 import { css, cx } from "hono/jsx/dom/css";
-import type { Overlap } from "../../domain/overlap.ts";
-import { NAME_SEPARATOR, unitTitle, type Unit } from "../../domain/unit.ts";
+import type { Overlap } from "../../core/my-table/overlap.ts";
+import { NAME_SEPARATOR, unitTitle, type Unit } from "../../core/timetable/unit.ts";
 import type { EventDoc } from "../../shared/event.ts";
 
 /** 進行中の印 */

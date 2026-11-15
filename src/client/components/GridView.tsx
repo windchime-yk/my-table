@@ -12,14 +12,26 @@ import {
   relayRowsByStage,
   rowsByStage,
   TICK_MINUTES,
-} from "../../domain/grid.ts";
-import type { ListRow } from "../../domain/list.ts";
-import { stageColor } from "../../domain/stage-color.ts";
-import { formatMinutes, toMinutes } from "../../domain/time.ts";
-import { isRunning, NAME_SEPARATOR, timeLabel, unitTitle, type Unit } from "../../domain/unit.ts";
+} from "../../core/timetable/grid.ts";
+import type { ListRow } from "../../core/timetable/list.ts";
+import { stageColor } from "../../core/timetable/stage-color.ts";
+import { formatMinutes, toMinutes } from "../../core/timetable/time.ts";
+import { isRunning, NAME_SEPARATOR, timeLabel, unitTitle, type Unit } from "../../core/timetable/unit.ts";
 import type { Day, EventDoc } from "../../shared/event.ts";
 import { Check, Live, Order, OverlapFlags, Tags } from "./marks.tsx";
 import { type CardContext, pressed, stageStyle } from "../ui.ts";
+import {
+  card,
+  cardButton,
+  cardOn,
+  cardLive,
+  cardHead,
+  cardTime,
+  cardTitle,
+  cardSub,
+  talk,
+  talkTitle,
+} from "./card-styles.ts";
 import * as s from "../styles.ts";
 
 /** 時刻の列と、ステージの列。見出しと本体で同じ列の割り方にする */
@@ -360,19 +372,19 @@ const GridCard: FC<{
   return (
     <button
       type="button"
-      class={cx(s.card, s.cardButton, gridCard, relayFrom && relay, on && s.cardOn, running && s.cardLive)}
+      class={cx(card, cardButton, gridCard, relayFrom && relay, on && cardOn, running && cardLive)}
       aria-pressed={pressed(on)}
       title={title}
       onClick={() => ctx.toggle(unit.id)}
     >
-      <span class={s.cardHead}>
-        <span class={s.cardTime}>{timeLabel(unit)}</span>
+      <span class={cardHead}>
+        <span class={cardTime}>{timeLabel(unit)}</span>
         {running ? <Live /> : null}
         {relayFrom ? <span class={relayBadge}>中継 {relayFrom}</span> : null}
         {slot.kind_label ? <span class={s.muted}>{slot.kind_label}</span> : null}
       </span>
-      <span class={cx(s.cardTitle, gridCardTitle)}>{title}</span>
-      {sub.length > 0 ? <span class={cx(s.cardSub, oneLine)}>{sub.join(" · ")}</span> : null}
+      <span class={cx(cardTitle, gridCardTitle)}>{title}</span>
+      {sub.length > 0 ? <span class={cx(cardSub, oneLine)}>{sub.join(" · ")}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
       <OverlapFlags overlaps={ctx.overlaps.get(unit.id)} />
       <Check on={on} size="small" />
@@ -386,8 +398,8 @@ const GridBlock: FC<{ row: ListRow; ctx: CardContext; relayFrom?: string }> = ({
   const heading = [timeLabel(units[0]), slot.title, slot.kind_label].filter(Boolean).join(" · ");
   const running = isRunning(units[0], ctx.nowMinutes);
   return (
-    <div class={cx(s.card, gridBlock, relayFrom && relay, running && s.cardLive)}>
-      <span class={cx(s.cardHead, s.muted)}>
+    <div class={cx(card, gridBlock, relayFrom && relay, running && cardLive)}>
+      <span class={cx(cardHead, s.muted)}>
         {heading}
         {running ? <Live /> : null}
         {relayFrom ? <span class={relayBadge}>中継 {relayFrom}</span> : null}
@@ -398,12 +410,12 @@ const GridBlock: FC<{ row: ListRow; ctx: CardContext; relayFrom?: string }> = ({
         return (
           <button
             type="button"
-            class={cx(s.talk, gridTalk, on && s.cardOn)}
+            class={cx(talk, gridTalk, on && cardOn)}
             aria-pressed={pressed(on)}
             title={title}
             onClick={() => ctx.toggle(unit.id)}
           >
-            <span class={cx(s.talkTitle, oneLine)}>
+            <span class={cx(talkTitle, oneLine)}>
               <Order unit={unit} />
               {title}
             </span>

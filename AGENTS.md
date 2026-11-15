@@ -49,10 +49,13 @@ src/index.tsx                 Worker の入口
 src/pages/ src/components/    サーバーが返す画面（hono/jsx）
 src/client/                   ブラウザ側の画面（hono/jsx/dom）。入口は main.tsx、状態は App.tsx
 src/client/components/        ブラウザ側の UI ごとの部品（スタイルも同じファイルに置く）
-src/domain/                   時刻・選べる単位などのロジック（純粋な関数。DOM に依存しない）
+src/core/                     画面から切り離したロジック（純粋な関数。DOM に依存しない）。機能ごとのフォルダに分ける
+  timetable/                  タイムテーブルの組み立て（時刻・選べる単位・リスト・横並び・ステージ色・日の選び方と現在時刻）
+  my-table/                   利用者の選択（保存する形・データ更新への追従・時間の重なり・書き出しファイル）
+  image/                      画像（文字の折り返し）
 src/shared/                   型と、サーバー・ブラウザの両方で使う関数
 src/styles.ts                 テーマと、サーバー側の複数のページで使うスタイル（hono/css）
-src/client/styles.ts          ブラウザ側の複数の UI で使うスタイル
+src/client/styles.ts          ブラウザ側の画面全体で使うスタイル
 docs/SPEC.md                  設計・データの流れ・スキーマ・データ作成の指針
 ```
 
@@ -61,7 +64,7 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 - **実行環境**: Cloudflare Workers 上の Hono。ビルドは Vite ＋ `@cloudflare/vite-plugin`。HonoX・Void は使わない
 - **画面**: サーバーは hono/jsx、ブラウザ側の操作は hono/jsx/dom。React などは入れない。ブラウザ側のファイルは先頭に `/** @jsxImportSource hono/jsx/dom */` を書き、スタイルは `hono/jsx/dom/css` を使う
 - **ブラウザ側のビルド**: Vite の `client` 環境で `src/client/main.tsx` をビルドし、Worker の静的アセット（`/static/client.js`）として配信する。Worker が先にビルドされるのでファイル名は固定。開発サーバーでは `/src/client/main.tsx` を直接読み込む
-- **スタイル**: hono/css。スタイルは使う部品・ページと同じファイルに置き（コロケーション）、複数の箇所で使うものだけを `src/styles.ts`（サーバー側）・`src/client/styles.ts`（ブラウザ側）に置く。クラスの組み合わせは必ず `cx()` を使う（テンプレート文字列でつなぐとサーバー側で `document is not defined` になる）
+- **スタイル**: hono/css。スタイルは使う部品・ページと同じファイルに置き（コロケーション）、画面全体で使うものだけを `src/styles.ts`（サーバー側）・`src/client/styles.ts`（ブラウザ側）に置く。特定の UI の仲間うちで使うものは、その近くに置く（枠のカードは `src/client/components/card-styles.ts`）。クラスの組み合わせは必ず `cx()` を使う（テンプレート文字列でつなぐとサーバー側で `document is not defined` になる）
 - **色**: OKLCH で書く。テーマの色は `src/styles.ts` の CSS 変数にまとめ、無彩色寄りの色は色相 255 にそろえる。データのステージ色も OKLCH
 - **パッケージ管理**: pnpm（`packageManager` に正確なバージョン）。Bun は使わない。依存のビルドスクリプトは `pnpm-workspace.yaml` の `allowBuilds` で許可する
 - **Node.js**: `.node-version`（最新の Active LTS）。スクリプトは TypeScript のまま Node で直接実行する（型を取り除くだけで動く書き方。`tsx` などは入れない。import には `.ts` 拡張子を付ける）
@@ -74,7 +77,7 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 ## 設計の方針
 
 - クラスを使った DDD（エンティティ・リポジトリ・集約）はしない。データは Zod から作った型のまま扱い、ロジックは純粋な関数で書く
-- 時刻、選べる単位（枠、またはブロック内のトーク1本）、時間の重なり、データ更新への追従などのロジックは `src/domain/` に置き、DOM に依存させずにテストする
+- 時刻、選べる単位（枠、またはブロック内のトーク1本）、時間の重なり、データ更新への追従などのロジックは `src/core/` に置き、DOM に依存させずにテストする。フォルダ名は、DDD の用語と紛れないよう `domain` ではなく `core` にしている
 - 用語は docs/SPEC.md とコードでそろえる（イベント・日・ステージ・枠・トーク・押し・リトライ・マイテーブル）
 - データを作る側（ビルド時）と、利用者のマイテーブル（ブラウザ）は、公開しているスキーマだけでつなぐ
 - サーバーからブラウザへの初期データは `<script type="application/json">` に埋め込む。`<` `>` `&` と U+2028・U+2029 をエスケープする（U+2028 をソースに生の文字で書くと壊れるので `String.fromCharCode` を使う）
@@ -117,4 +120,4 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 - `src/client/storage.ts`: localStorage の読み書き
 - `src/server/index.tsx`: ページと初期データの埋め込み
 
-移すときは、そのままコピーせず今の決まり（Zod の型、`src/domain/`、OKLCH、`cx`、`toSorted`、型の決めつけをしない）に合わせて書き直す。
+移すときは、そのままコピーせず今の決まり（Zod の型、`src/core/`、OKLCH、`cx`、`toSorted`、型の決めつけをしない）に合わせて書き直す。

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Day } from "../shared/event.ts";
+import type { Day } from "../../shared/event.ts";
 import { findOverlaps } from "./overlap.ts";
-import { unitsForDay } from "./unit.ts";
+import { unitsForDay } from "../timetable/unit.ts";
 
 const day: Day = {
   date: "2026-11-01",
