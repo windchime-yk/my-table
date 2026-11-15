@@ -25,17 +25,14 @@ const HEADER_H = 200;
 const FOOTER_H = 120;
 const ROW_GAP = 16;
 
-/**
- * テーマの色。画面と同じ CSS 変数（OKLCH）を読んで使う。
- * fallback は、canvas が OKLCH を解釈できない古いブラウザ用（そのため OKLCH では書けない）
- */
+/** テーマの色。画面と同じ CSS 変数（OKLCH。src/styles.ts で定義）を読んで使う */
 const THEME = {
-  bg: { name: "--bg", fallback: "#0d0f12" },
-  surface: { name: "--surface", fallback: "#171a1f" },
-  ink: { name: "--ink", fallback: "#f2f4f7" },
-  muted: { name: "--muted", fallback: "#9aa3ad" },
-  line: { name: "--line", fallback: "#2a2f36" },
-  warn: { name: "--warn", fallback: "#ffb547" },
+  bg: "--bg",
+  surface: "--surface",
+  ink: "--ink",
+  muted: "--muted",
+  line: "--line",
+  warn: "--warn",
 } as const;
 
 type ThemeColor = keyof typeof THEME;
@@ -64,14 +61,9 @@ export function renderMyTable({ doc, day, units, overlaps }: ImageInput): Promis
   if (!ctx) return Promise.reject(new Error("canvas を使えません"));
 
   const rootStyle = getComputedStyle(document.documentElement);
-  /** 塗りの色を決める。解釈できない色を代入しても無視されるだけなので、先に fallback を入れておく */
-  const fill = (color: string, fallback: string) => {
-    ctx.fillStyle = fallback;
-    ctx.fillStyle = color;
-  };
+  /** 塗りの色を、テーマの色にする */
   const fillTheme = (key: ThemeColor) => {
-    const { name, fallback } = THEME[key];
-    fill(rootStyle.getPropertyValue(name).trim() || fallback, fallback);
+    ctx.fillStyle = rootStyle.getPropertyValue(THEME[key]).trim();
   };
   const font = (weight: number, size: number) => {
     ctx.font = `${weight} ${size}px ${FONT}`;
@@ -145,7 +137,7 @@ export function renderMyTable({ doc, day, units, overlaps }: ImageInput): Promis
     fillTheme("surface");
     roundRect(ctx, CARD_X, y, CARD_W, row.height, 20);
     ctx.fill();
-    fill(color, THEME.muted.fallback);
+    ctx.fillStyle = color;
     roundRect(ctx, CARD_X, y, STRIPE_W, row.height, 5);
     ctx.fill();
 
@@ -164,7 +156,7 @@ export function renderMyTable({ doc, day, units, overlaps }: ImageInput): Promis
     }
     ctx.textAlign = "left";
 
-    fill(color, THEME.muted.fallback);
+    ctx.fillStyle = color;
     font(700, 26);
     ctx.fillText(oneLine(unit.stage.name, TEXT_W), TEXT_X, textY);
     textY += 8;
