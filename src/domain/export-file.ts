@@ -1,6 +1,6 @@
 // マイテーブルの書き出しファイル。ログインがない代わりの、控えと別の端末への移行の手段
 
-import * as z from "zod/mini";
+import { z } from "zod";
 import type { EventDoc } from "../shared/event.ts";
 import { reconcile, selectedIdsSchema } from "./selection.ts";
 
@@ -15,12 +15,12 @@ const exportFileSchema = z.object({
   formatVersion: z.literal(FILE_FORMAT_VERSION),
   eventId: z.string(),
   /** 別のイベントのファイルを読み込もうとしたときに、名前で知らせるためのもの */
-  eventName: z.nullish(z.string()),
+  eventName: z.string().nullish(),
   /** 書き出したときのイベントデータのバージョン */
   version: z.string(),
   selected: selectedIdsSchema,
   /** 書き出した日時（ISO 8601）。読み込みには使わない */
-  exportedAt: z.nullish(z.string()),
+  exportedAt: z.string().nullish(),
 });
 
 export type ExportFile = z.output<typeof exportFileSchema>;

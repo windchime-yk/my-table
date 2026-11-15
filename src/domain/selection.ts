@@ -1,15 +1,13 @@
 // 利用者の選択（マイテーブル）。選べる単位の ID を並べたもので、ブラウザの localStorage にだけ保存する
 
-// ブラウザに入れるので、軽量版の zod/mini を使う（メソッドをつなぐ書き方ではなく、関数で組み立てる）
-import * as z from "zod/mini";
+import { z } from "zod";
 import type { EventDoc } from "../shared/event.ts";
 import { unitsForDay } from "./unit.ts";
 
 /** 選んだ単位の ID の並び。文字列でないものと重複は取り除く（ID が一部壊れていても、残りは生かす） */
-export const selectedIdsSchema = z.pipe(
-  z.array(z.unknown()),
-  z.transform((ids: unknown[]) => [...new Set(ids.filter((id): id is string => typeof id === "string"))]),
-);
+export const selectedIdsSchema = z
+  .array(z.unknown())
+  .transform((ids) => [...new Set(ids.filter((id): id is string => typeof id === "string"))]);
 
 /** localStorage に保存する形 */
 const storedSchema = z.object({
@@ -18,7 +16,7 @@ const storedSchema = z.object({
   /** 選んだ単位の ID（枠の id か、トークの id）。選んだ順 */
   selected: selectedIdsSchema,
   /** 保存した日時（ISO 8601）。なくても読めるようにする */
-  updatedAt: z.catch(z.string(), ""),
+  updatedAt: z.string().catch(""),
 });
 
 export type Stored = z.output<typeof storedSchema>;
