@@ -3,6 +3,7 @@ import type { FC } from "hono/jsx";
 import { useEffect, useMemo, useRef, useState } from "hono/jsx";
 import { cx } from "hono/jsx/dom/css";
 import { nowInZone, pickDayIndex } from "../domain/day.ts";
+import { buildExport, parseImport } from "../domain/export-file.ts";
 import {
   gridBox,
   gridHeight,
@@ -15,7 +16,7 @@ import {
 } from "../domain/grid.ts";
 import { listGroups, type ListGroup, type ListRow } from "../domain/list.ts";
 import { findOverlaps, type Overlap } from "../domain/overlap.ts";
-import { toggleSelected } from "../domain/selection.ts";
+import { selectableIds, toggleSelected } from "../domain/selection.ts";
 import { stageColor } from "../domain/stage-color.ts";
 import { formatMinutes, toMinutes } from "../domain/time.ts";
 import { timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
@@ -33,6 +34,28 @@ interface Selection {
   /** 表示している日の、選んだ単位どうしの時間の重なり（単位の ID ごと） */
   overlaps: Map<string, Overlap[]>;
   toggle: (id: string) => void;
+}
+
+/** 画面の上に出す知らせ。warn は注意（外れた枠がある、読み込めなかった）、そうでなければ結果の報告 */
+export interface Notice {
+  warn: boolean;
+  text: string;
+}
+
+/** 読み込むファイルの大きさの上限。書き出しファイルは数 KB なので、これより大きいものは別のファイルとみなす */
+const MAX_IMPORT_BYTES = 1_000_000;
+
+/** ブラウザにファイルとして保存させる */
+function download(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  // 保存が始まる前に URL を無効にしないよう、少し待ってから片付ける
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 /** この幅以上の画面では、ステージを列にした横並び表示にする */
@@ -56,7 +79,7 @@ export interface AppProps {
   /** 開いたときの選択（保存してあったものを、今のデータに合わせたもの） */
   initialSelected: string[];
   /** 開いたときに出す知らせ（データの更新で外れた枠があったとき）。なければ null */
-  initialNotice: string | null;
+  initialNotice: Notice | null;
   /** 開いたときの保存し直しに失敗したか */
   initialSaveFailed: boolean;
 }
@@ -72,6 +95,7 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
 
   const [wide, setWide] = useState(() => window.matchMedia(WIDE_QUERY).matches);
   const dayNavRef = useRef<HTMLElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // 画面の幅が変わったら（端末の回転、ウィンドウの大きさの変更）、表示を切り替える
   useEffect(() => {
@@ -107,10 +131,63 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
     [doc, selected],
   );
 
-  const toggle = (id: string) => {
-    const next = toggleSelected(selectedIds, id);
+  /** 選択を入れ替えて保存する */
+  const update = (next: string[]) => {
     setSelectedIds(next);
     setSaveFailed(!saveSelection(doc.id, doc.version, next));
+  };
+  const toggle = (id: string) => update(toggleSelected(selectedIds, id));
+
+  /** 全日分の選択をファイルに書き出す */
+  const exportFile = () => {
+    const json = JSON.stringify(buildExport(doc, selectedIds, new Date()), null, 2);
+    download(new Blob([json], { type: "application/json" }), `my-table-${doc.id}.json`);
+  };
+
+  /** 選ばれたファイルを読み込む。既存の選択とは混ぜずに上書きする */
+  const importFile = async () => {
+    const input = fileRef.current;
+    const file = input?.files?.[0];
+    // 同じファイルをもう一度選んでも読み込めるよう、選択を空に戻す
+    if (input) input.value = "";
+    if (!file) return;
+    const unreadable = {
+      warn: true,
+      text: "このファイルは読み込めません。マイテーブルから書き出したファイルを選んでください。",
+    };
+    if (file.size > MAX_IMPORT_BYTES) return setNotice(unreadable);
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      return setNotice(unreadable);
+    }
+    const result = parseImport(text, doc, selectableIds(doc));
+    if (!result.ok) {
+      if (result.reason === "invalid") return setNotice(unreadable);
+      return setNotice({
+        warn: true,
+        text: `このファイルは別のイベント「${result.eventName ?? result.eventId}」のものです。読み込みませんでした。`,
+      });
+    }
+    if (selectedIds.length > 0 && !confirm("今のマイテーブルを、ファイルの内容で上書きします。よろしいですか？")) {
+      return;
+    }
+    update(result.selected);
+    if (result.removed === 0) {
+      setNotice({ warn: false, text: `${result.selected.length}件を読み込みました。` });
+    } else if (result.versionChanged) {
+      setNotice({
+        warn: true,
+        text: `読み込みました。タイムテーブルが更新されているため、${result.removed}件が外れました。`,
+      });
+    } else {
+      setNotice({ warn: true, text: `読み込みました。見つからない枠が${result.removed}件あったため外しました。` });
+    }
+  };
+
+  const clearAll = () => {
+    if (confirm("マイテーブルの選択を、すべての日の分まとめて解除します。よろしいですか？")) update([]);
   };
   const selection: Selection = { selected, overlaps, toggle };
 
@@ -175,8 +252,8 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
       </nav>
 
       {notice ? (
-        <p class={cx(s.warning, s.notice)} role="status">
-          {notice}
+        <p class={cx(s.warning, s.notice, notice.warn && s.noticeWarn)} role="status">
+          {notice.text}
           <button type="button" class={s.noticeClose} aria-label="閉じる" onClick={() => setNotice(null)}>
             ×
           </button>
@@ -184,12 +261,20 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
       ) : null}
       {saveFailed ? (
         <p class={s.warning} role="status">
-          このブラウザでは選択を保存できませんでした（プライベートブラウズなど）。ページを閉じると選択は消えます。
+          このブラウザでは選択を保存できませんでした（プライベートブラウズなど）。ページを閉じると選択は消えます。マイテーブルの「ファイルに書き出す」で控えを取れます。
         </p>
       ) : null}
 
       {view === "mine" ? (
-        <MineView doc={doc} units={mine} selection={selection} />
+        <MineView
+          doc={doc}
+          units={mine}
+          selection={selection}
+          hasAnySelection={selectedIds.length > 0}
+          onExport={exportFile}
+          onImport={() => fileRef.current?.click()}
+          onClear={clearAll}
+        />
       ) : (
         <>
           <StageChips day={day} stageId={stageId} onChange={setStageFilter} />
@@ -200,6 +285,16 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
           )}
         </>
       )}
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/json,.json"
+        hidden
+        onChange={() => {
+          void importFile();
+        }}
+      />
     </>
   );
 };
@@ -540,13 +635,38 @@ const GridBlock: FC<{ row: ListRow; selection: Selection }> = ({ row, selection 
 
 // ---------- マイテーブル ----------
 
-const MineView: FC<{ doc: EventDoc; units: Unit[]; selection: Selection }> = ({ doc, units, selection }) => (
+const MineView: FC<{
+  doc: EventDoc;
+  /** 表示している日の、選んだ単位 */
+  units: Unit[];
+  selection: Selection;
+  /** ほかの日も含めて、何か選んでいるか */
+  hasAnySelection: boolean;
+  onExport: () => void;
+  onImport: () => void;
+  onClear: () => void;
+}> = ({ doc, units, selection, hasAnySelection, onExport, onImport, onClear }) => (
   <div class={cx(s.stack, s.mineColumn)}>
+    <div class={s.actions}>
+      <button type="button" class={s.action} onClick={onExport}>
+        ファイルに書き出す
+      </button>
+      <button type="button" class={s.action} onClick={onImport}>
+        ファイルから読み込む
+      </button>
+      {hasAnySelection ? (
+        <button type="button" class={cx(s.action, s.actionGhost)} onClick={onClear}>
+          すべて解除
+        </button>
+      ) : null}
+    </div>
     {units.length > 0 ? (
       units.map((unit) => <UnitCard doc={doc} unit={unit} selection={selection} />)
     ) : (
       <p class={s.emptyBox}>まだ何も選んでいません。「タイムテーブル」で見たい枠をタップしてください。</p>
     )}
-    <p class={s.note}>選んだ枠はこのブラウザにだけ保存され、サーバーには送信しません。</p>
+    <p class={s.note}>
+      選んだ枠はこのブラウザにだけ保存され、サーバーには送信しません。控えを取るときや、別の端末・ブラウザに移すときは、ファイルに書き出して読み込んでください。
+    </p>
   </div>
 );
