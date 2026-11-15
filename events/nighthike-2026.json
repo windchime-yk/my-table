@@ -1,0 +1,882 @@
+{
+  "$schema": "https://mt.whyk.dev/schema/v1/event.schema.json",
+  "schema_version": "1",
+  "id": "nighthike-2026",
+  "visibility": "public",
+  "event": {
+    "name": "Night Hike 2026 in Makuhari",
+    "venue": "幕張メッセ 9〜11ホール",
+    "timezone": "Asia/Tokyo",
+    "official_url": null,
+    "sources": [
+      "公式タイムテーブル画像（DAY1 10/31・DAY2 11/01）",
+      "公式告知「ホール9 タイムテーブル変更修正のお知らせ」（11/01）",
+      "公式告知「Night STAGE 20分押し」（11/01 18:31）"
+    ],
+    "notice": null
+  },
+  "tag_definitions": {
+    "no_photo": "撮影禁止"
+  },
+  "days": [
+    {
+      "date": "2026-10-31",
+      "label": "DAY1",
+      "end_time": null,
+      "day_events": [
+        {
+          "start": "12:15",
+          "end": "12:40",
+          "title": "OPEN",
+          "kind": "doors",
+          "stages": ["night"]
+        },
+        {
+          "start": "12:15",
+          "end": "14:00",
+          "title": "OPEN",
+          "kind": "doors",
+          "stages": ["culture"]
+        }
+      ],
+      "stages": [
+        {
+          "id": "hike",
+          "name": "Hike STAGE",
+          "color": null,
+          "closed": [],
+          "slots": [
+            {
+              "id": "d1-hike-1100",
+              "start": "11:00",
+              "end": "12:15",
+              "end_source": "next_slot",
+              "title": "OPENING",
+              "speakers": [],
+              "kind_label": null,
+              "category": "ceremony",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1215",
+              "start": "12:15",
+              "end": "12:45",
+              "end_source": "next_slot",
+              "title": "只野 楓",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-hike-1245",
+              "start": "12:45",
+              "end": "13:15",
+              "end_source": "inferred",
+              "title": "okadada",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1325",
+              "start": "13:25",
+              "end": "13:55",
+              "end_source": "next_slot",
+              "title": "LanPage",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1355",
+              "start": "13:55",
+              "end": "14:25",
+              "end_source": "inferred",
+              "title": "椎乃味醂",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1430",
+              "start": "14:30",
+              "end": "14:55",
+              "end_source": "next_slot",
+              "title": "SARUKANI",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1455",
+              "start": "14:55",
+              "end": "15:15",
+              "end_source": "next_slot",
+              "title": "メルティさん&Mr.ナブル&アンドロメダ子",
+              "note": "from はるまきごはん×煮ル果実×ナユタン星人",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1515",
+              "start": "15:15",
+              "end": "15:45",
+              "end_source": "inferred",
+              "title": "TREKKIE TRAX CREW",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1555",
+              "start": "15:55",
+              "end": "16:25",
+              "end_source": "next_slot",
+              "title": "こっちのけんと",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-hike-1625",
+              "start": "16:25",
+              "end": "16:55",
+              "end_source": "inferred",
+              "title": "DÉ DÉ MOUSE",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1705",
+              "start": "17:05",
+              "end": "17:35",
+              "end_source": "next_slot",
+              "title": "muque",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-hike-1735",
+              "start": "17:35",
+              "end": "18:05",
+              "end_source": "inferred",
+              "title": "なきそ",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1815",
+              "start": "18:15",
+              "end": "18:45",
+              "end_source": "next_slot",
+              "title": "須田景凪",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-hike-1845",
+              "start": "18:45",
+              "end": "19:15",
+              "end_source": "inferred",
+              "title": "TeddyLoid",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-1925",
+              "start": "19:25",
+              "end": "19:55",
+              "end_source": "next_slot",
+              "title": "syudou",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-hike-1955",
+              "start": "19:55",
+              "end": "20:25",
+              "end_source": "inferred",
+              "title": "☆Taku Takahashi",
+              "note": "m-flo, block.fm",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-hike-2035",
+              "start": "20:35",
+              "end": "21:10",
+              "end_source": "inferred",
+              "title": "DUSTCELL",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            }
+          ]
+        },
+        {
+          "id": "night",
+          "name": "Night STAGE",
+          "color": null,
+          "closed": [],
+          "slots": [
+            {
+              "id": "d1-night-1240",
+              "start": "12:40",
+              "end": "13:10",
+              "end_source": "next_slot",
+              "title": "hasty",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-night-1310",
+              "start": "13:10",
+              "end": "13:40",
+              "end_source": "next_slot",
+              "title": "煮ル果実",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-night-1340",
+              "start": "13:40",
+              "end": "14:10",
+              "end_source": "next_slot",
+              "title": "大漠波新",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-night-1410",
+              "start": "14:10",
+              "end": "14:40",
+              "end_source": "inferred",
+              "title": "なみぐる&平田義久",
+              "speakers": [],
+              "kind_label": "DJ LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-night-1450",
+              "start": "14:50",
+              "end": "15:20",
+              "end_source": "next_slot",
+              "title": "笹川真生",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-night-1520",
+              "start": "15:20",
+              "end": "16:20",
+              "end_source": "inferred",
+              "title": "3M (MAKUHARI MEGA MIX)",
+              "note": "Supported by Spotify",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-night-1630",
+              "start": "16:30",
+              "end": "17:05",
+              "end_source": "next_slot",
+              "title": "FAKETYPE.",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-night-1705",
+              "start": "17:05",
+              "end": "17:30",
+              "end_source": "inferred",
+              "title": "GenerationZ",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-night-1740",
+              "start": "17:40",
+              "end": "18:10",
+              "end_source": "next_slot",
+              "title": "Guiano",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-night-1810",
+              "start": "18:10",
+              "end": "18:50",
+              "end_source": "inferred",
+              "title": "雄之助×SYNK",
+              "note": "LAM・安倉・yonayona graphics",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-night-1900",
+              "start": "19:00",
+              "end": "19:30",
+              "end_source": "next_slot",
+              "title": "かいりきベア",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-night-1930",
+              "start": "19:30",
+              "end": "20:00",
+              "end_source": "inferred",
+              "title": "PASTASTA",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d1-night-2005",
+              "start": "20:05",
+              "end": "20:45",
+              "end_source": "inferred",
+              "title": "r-906",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            }
+          ]
+        },
+        {
+          "id": "culture",
+          "name": "Culture STAGE",
+          "color": null,
+          "closed": [],
+          "slots": [
+            {
+              "id": "d1-culture-1400",
+              "start": "14:00",
+              "end": "15:00",
+              "end_source": "inferred",
+              "title": "CAROL",
+              "speakers": [],
+              "kind_label": "映像作家トークセッション",
+              "category": "talk",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-culture-1520",
+              "start": "15:20",
+              "end": "16:25",
+              "end_source": "inferred",
+              "title": "イリヤ・クブシノブ",
+              "speakers": [],
+              "kind_label": "ライブドローイング",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-culture-1700",
+              "start": "17:00",
+              "end": "18:00",
+              "end_source": "inferred",
+              "title": "TeddyLoid",
+              "speakers": [],
+              "kind_label": "Making Sense of Music powered by Ableton / 覚醒前夜",
+              "category": "talk",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d1-culture-1825",
+              "start": "18:25",
+              "end": "19:45",
+              "end_source": "inferred",
+              "title": "TIME ATTACK CREATION",
+              "speakers": ["⌘ハイノミ", "Roitz", "Bivi"],
+              "kind_label": null,
+              "category": "performance",
+              "tags": ["no_photo"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "label": "DAY2",
+      "end_time": null,
+      "day_events": [
+        {
+          "start": "12:15",
+          "end": "14:00",
+          "title": "OPEN",
+          "kind": "doors",
+          "stages": ["culture"]
+        }
+      ],
+      "stages": [
+        {
+          "id": "hike",
+          "name": "Hike STAGE",
+          "color": null,
+          "closed": [],
+          "slots": [
+            {
+              "id": "d2-hike-1100",
+              "start": "11:00",
+              "end": "12:00",
+              "end_source": "next_slot",
+              "title": "OPENING",
+              "speakers": [],
+              "kind_label": null,
+              "category": "ceremony",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1200",
+              "start": "12:00",
+              "end": "12:30",
+              "end_source": "next_slot",
+              "title": "水槽",
+              "note": "LiveSet",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1230",
+              "start": "12:30",
+              "end": "13:00",
+              "end_source": "inferred",
+              "title": "サツキ",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1310",
+              "start": "13:10",
+              "end": "13:40",
+              "end_source": "next_slot",
+              "title": "粗品",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-hike-1340",
+              "start": "13:40",
+              "end": "14:10",
+              "end_source": "inferred",
+              "title": "JAMBORIDE",
+              "note": "BANVOX & SEKITOVA",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1415",
+              "start": "14:15",
+              "end": "14:35",
+              "end_source": "explicit",
+              "title": "水槽",
+              "note": "LiveSet・リトライ",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1420",
+              "start": "14:45",
+              "end": "15:15",
+              "end_source": "explicit",
+              "title": "名取さな",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1450",
+              "start": "15:15",
+              "end": "15:45",
+              "end_source": "explicit",
+              "title": "DJ WILDPARTY",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1530",
+              "start": "15:55",
+              "end": "16:25",
+              "end_source": "explicit",
+              "title": "Kizuna AI",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1605",
+              "start": "16:30",
+              "end": "17:00",
+              "end_source": "explicit",
+              "title": "鬱P meet siinamota",
+              "note": "BandSet / Guest Vocal: Sou",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-hike-1635",
+              "start": "17:00",
+              "end": "17:30",
+              "end_source": "explicit",
+              "title": "八王子P",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1715",
+              "start": "17:40",
+              "end": "18:10",
+              "end_source": "explicit",
+              "title": "花譜",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-hike-1745",
+              "start": "18:10",
+              "end": "18:40",
+              "end_source": "explicit",
+              "title": "鬱P",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1825",
+              "start": "18:50",
+              "end": "19:20",
+              "end_source": "explicit",
+              "title": "ピノキオピー",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1900",
+              "start": "19:25",
+              "end": "19:55",
+              "end_source": "explicit",
+              "title": "きくお",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-1935",
+              "start": "20:00",
+              "end": "20:30",
+              "end_source": "explicit",
+              "title": "kz(livetune)",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-hike-2015",
+              "start": "20:40",
+              "end": "21:20",
+              "end_source": "explicit",
+              "title": "THE SPELLBOUND × BOOM BOOM SATELLITES",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            }
+          ]
+        },
+        {
+          "id": "night",
+          "name": "Night STAGE",
+          "color": null,
+          "closed": [],
+          "slots": [
+            {
+              "id": "d2-night-1145",
+              "start": "11:45",
+              "end": "12:15",
+              "end_source": "next_slot",
+              "title": "和田たけあき",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1215",
+              "start": "12:15",
+              "end": "12:45",
+              "end_source": "next_slot",
+              "title": "梓川",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-night-1245",
+              "start": "12:45",
+              "end": "13:15",
+              "end_source": "next_slot",
+              "title": "KMNZ",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1315",
+              "start": "13:15",
+              "end": "14:15",
+              "end_source": "inferred",
+              "title": "3M (MAKUHARI MEGA MIX)",
+              "note": "Supported by Spotify",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-night-1425",
+              "start": "14:25",
+              "end": "14:55",
+              "end_source": "next_slot",
+              "title": "カンザキイオリ",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-night-1455",
+              "start": "14:55",
+              "end": "15:25",
+              "end_source": "inferred",
+              "title": "TAK",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1535",
+              "start": "15:35",
+              "end": "16:05",
+              "end_source": "next_slot",
+              "title": "Empty old City",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-night-1605",
+              "start": "16:05",
+              "end": "16:35",
+              "end_source": "inferred",
+              "title": "KOTONOHOUSE",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1645",
+              "start": "16:45",
+              "end": "17:15",
+              "end_source": "next_slot",
+              "title": "Dios",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1715",
+              "start": "17:15",
+              "end": "17:55",
+              "end_source": "next_slot",
+              "title": "Aiobahn",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1755",
+              "start": "18:15",
+              "end": "18:45",
+              "end_source": "next_slot",
+              "title": "原口沙輔",
+              "note": "20分押し（公式告知 11/01 18:31）",
+              "speakers": [],
+              "kind_label": "LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1825",
+              "start": "18:45",
+              "end": "19:15",
+              "end_source": "inferred",
+              "title": "大沢伸一",
+              "note": "20分押し（公式告知 11/01 18:31）",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1905",
+              "start": "19:25",
+              "end": "19:55",
+              "end_source": "next_slot",
+              "title": "ツミキ",
+              "note": "20分押し（公式告知 11/01 18:31）",
+              "speakers": [],
+              "kind_label": "DJ LIVE",
+              "category": "performance",
+              "tags": []
+            },
+            {
+              "id": "d2-night-1935",
+              "start": "19:55",
+              "end": "20:35",
+              "end_source": "inferred",
+              "title": "石野卓球",
+              "note": "20分押し（公式告知 11/01 18:31）",
+              "speakers": [],
+              "kind_label": "DJ",
+              "category": "performance",
+              "tags": []
+            }
+          ]
+        },
+        {
+          "id": "culture",
+          "name": "Culture STAGE",
+          "color": null,
+          "closed": [],
+          "slots": [
+            {
+              "id": "d2-culture-1400",
+              "start": "14:00",
+              "end": "15:10",
+              "end_source": "inferred",
+              "title": "メレ",
+              "speakers": [],
+              "kind_label": "ライブドローイング",
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-culture-1530",
+              "start": "15:30",
+              "end": "16:30",
+              "end_source": "inferred",
+              "title": "bees",
+              "speakers": [],
+              "kind_label": "映像作家トークセッション",
+              "category": "talk",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-culture-1700",
+              "start": "17:00",
+              "end": "18:25",
+              "end_source": "inferred",
+              "title": "BALCOLONY.",
+              "speakers": [],
+              "kind_label": null,
+              "category": "performance",
+              "tags": ["no_photo"]
+            },
+            {
+              "id": "d2-culture-1855",
+              "start": "18:55",
+              "end": "20:25",
+              "end_source": "inferred",
+              "title": "VIDEO GACHA",
+              "speakers": ["読谷あかね", "えいりな刃物", "マサラダ", "ひとびと"],
+              "kind_label": null,
+              "category": "performance",
+              "tags": ["no_photo"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
