@@ -1,18 +1,25 @@
 // 利用者の選択（マイテーブル）。選べる単位の ID を並べたもので、ブラウザの localStorage にだけ保存する
 
+import { z } from "zod";
 import type { EventDoc } from "../shared/event.ts";
-import { isRecord } from "../shared/guard.ts";
 import { unitsForDay } from "./unit.ts";
 
+/** 選んだ単位の ID の並び。文字列でないものと重複は取り除く（ID が一部壊れていても、残りは生かす） */
+export const selectedIdsSchema = z
+  .array(z.unknown())
+  .transform((ids) => [...new Set(ids.filter((id): id is string => typeof id === "string"))]);
+
 /** localStorage に保存する形 */
-export interface Stored {
+const storedSchema = z.object({
   /** 保存したときのイベントデータのバージョン。データが更新されたかの判定に使う */
-  version: string;
+  version: z.string(),
   /** 選んだ単位の ID（枠の id か、トークの id）。選んだ順 */
-  selected: string[];
-  /** 保存した日時（ISO 8601） */
-  updatedAt: string;
-}
+  selected: selectedIdsSchema,
+  /** 保存した日時（ISO 8601）。なくても読めるようにする */
+  updatedAt: z.string().catch(""),
+});
+
+export type Stored = z.output<typeof storedSchema>;
 
 /** localStorage のキー。v1 は保存する形の版で、イベントごとに分ける */
 export const storageKey = (eventId: string): string => `my-table:v1:${eventId}`;
@@ -35,13 +42,8 @@ export function parseStored(raw: string | null): Stored | null {
   } catch {
     return null;
   }
-  if (!isRecord(value) || typeof value.version !== "string" || !Array.isArray(value.selected)) return null;
-  const ids = value.selected.filter((id): id is string => typeof id === "string");
-  return {
-    version: value.version,
-    selected: [...new Set(ids)],
-    updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : "",
-  };
+  const result = storedSchema.safeParse(value);
+  return result.success ? result.data : null;
 }
 
 /** 選ぶ・外すを切り替えた、新しい選択を返す。時間が重なる単位も選べる */

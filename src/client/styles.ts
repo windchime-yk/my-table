@@ -130,6 +130,10 @@ export const warning = css`
 export const notice = css`
   position: relative;
   padding-right: 44px;
+`;
+
+/** 注意の知らせ（外れた枠がある、読み込めなかった） */
+export const noticeWarn = css`
   border-color: var(--warn);
 `;
 
@@ -516,6 +520,31 @@ export const mineColumn = css`
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
+`;
+
+/** 書き出し・読み込みなどの操作 */
+export const actions = css`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+export const action = css`
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+`;
+
+/** 取り消しにくい操作は、目立たせない */
+export const actionGhost = css`
+  background: none;
+  color: var(--muted);
 `;
 
 export const stack = css`
