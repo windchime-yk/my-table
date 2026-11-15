@@ -1,6 +1,20 @@
-import { cx, Style } from "hono/css";
+import { Style, css, cx } from "hono/css";
 import type { FC, PropsWithChildren } from "hono/jsx";
-import { footer, footerInner, globalClass, wrap } from "../styles.ts";
+import { globalClass, wrap } from "../styles.ts";
+
+const footer = css`
+  padding: 20px 0 32px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+`;
+
+const footerInner = css`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+`;
 
 const SITE_NAME = "マイテーブル";
 const REPOSITORY_URL = "https://github.com/windchime-yk/my-table";

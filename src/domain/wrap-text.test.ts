@@ -49,9 +49,15 @@ describe("wrapText", () => {
     expect(lines).toEqual([`${family}…`]);
   });
 
-  it("どの行も幅を超えない", () => {
+  describe("長い名前を3行に収めるとき", () => {
     const lines = wrapText("The Very Long Name Orchestra feat. Special Guests From Far Away", 12, 3, measure);
-    expect(lines).toHaveLength(3);
-    for (const line of lines) expect(measure(line)).toBeLessThanOrEqual(12);
+
+    it("3行になる", () => {
+      expect(lines).toHaveLength(3);
+    });
+
+    it.each(lines)("「%s」は幅を超えない", (line) => {
+      expect(measure(line)).toBeLessThanOrEqual(12);
+    });
   });
 });

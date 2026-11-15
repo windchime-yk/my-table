@@ -47,10 +47,12 @@ scripts/vite-plugin-events.ts events/ をチェックして Worker に同梱す�
 src/app.tsx                   Hono のアプリ（createApp にイベントデータを渡す）
 src/index.tsx                 Worker の入口
 src/pages/ src/components/    サーバーが返す画面（hono/jsx）
-src/client/                   ブラウザ側の画面（hono/jsx/dom）。入口は main.tsx
+src/client/                   ブラウザ側の画面（hono/jsx/dom）。入口は main.tsx、状態は App.tsx
+src/client/components/        ブラウザ側の UI ごとの部品（スタイルも同じファイルに置く）
 src/domain/                   時刻・選べる単位などのロジック（純粋な関数。DOM に依存しない）
 src/shared/                   型と、サーバー・ブラウザの両方で使う関数
-src/styles.ts                 hono/css のスタイルとテーマ
+src/styles.ts                 テーマと、サーバー側の複数のページで使うスタイル（hono/css）
+src/client/styles.ts          ブラウザ側の複数の UI で使うスタイル
 docs/SPEC.md                  設計・データの流れ・スキーマ・データ作成の指針
 ```
 
@@ -59,12 +61,12 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 - **実行環境**: Cloudflare Workers 上の Hono。ビルドは Vite ＋ `@cloudflare/vite-plugin`。HonoX・Void は使わない
 - **画面**: サーバーは hono/jsx、ブラウザ側の操作は hono/jsx/dom。React などは入れない。ブラウザ側のファイルは先頭に `/** @jsxImportSource hono/jsx/dom */` を書き、スタイルは `hono/jsx/dom/css` を使う
 - **ブラウザ側のビルド**: Vite の `client` 環境で `src/client/main.tsx` をビルドし、Worker の静的アセット（`/static/client.js`）として配信する。Worker が先にビルドされるのでファイル名は固定。開発サーバーでは `/src/client/main.tsx` を直接読み込む
-- **スタイル**: hono/css。クラスの組み合わせは必ず `cx()` を使う（テンプレート文字列でつなぐとサーバー側で `document is not defined` になる）
+- **スタイル**: hono/css。スタイルは使う部品・ページと同じファイルに置き（コロケーション）、複数の箇所で使うものだけを `src/styles.ts`（サーバー側）・`src/client/styles.ts`（ブラウザ側）に置く。クラスの組み合わせは必ず `cx()` を使う（テンプレート文字列でつなぐとサーバー側で `document is not defined` になる）
 - **色**: OKLCH で書く。テーマの色は `src/styles.ts` の CSS 変数にまとめ、無彩色寄りの色は色相 255 にそろえる。データのステージ色も OKLCH
 - **パッケージ管理**: pnpm（`packageManager` に正確なバージョン）。Bun は使わない。依存のビルドスクリプトは `pnpm-workspace.yaml` の `allowBuilds` で許可する
 - **Node.js**: `.node-version`（最新の Active LTS）。スクリプトは TypeScript のまま Node で直接実行する（型を取り除くだけで動く書き方。`tsx` などは入れない。import には `.ts` 拡張子を付ける）
 - **lint / format**: Oxlint ＋ Oxfmt。型チェックも Oxlint（type-aware）で行い、`tsc` は使わない（TypeScript 7 前提）
-- **テスト**: Vitest。テストは実装の隣に `*.test.ts(x)` で置く。Hono のページは `app.request()` で確かめる
+- **テスト**: Vitest。テストは実装の隣に `*.test.ts(x)` で置く。同じ確認を複数の値で繰り返すときは、for 文ではなく `it.each` を使う。Hono のページは `app.request()` で確かめる
 - **スキーマ**: Zod 4 の `schema/v1/event.ts` が唯一の定義元。型は `z.output` で作り、手で型を書かない。JSON Schema は `pnpm schema` で生成してコミットする（一致はテストで確かめる）。zod は、ビルド時のデータのチェックと、ブラウザ側で外から来たデータ（ページに埋め込んだ初期データ・localStorage・書き出しファイル）を読むときに使う。手書きの型ガードは書かない。ブラウザ側も通常の `zod` を使い、`zod/mini` は使わない（JS は gzip で約 18 kB 小さくなるが、書き方が2通りになるのを避けた）。Worker には入れない（`src/app.tsx` から読み込むファイルでは zod を import しない。型だけの `import type` はよい）
 - **データの同梱**: Vite プラグインが `events/*.json` をチェックし、公開分だけを仮想モジュール `virtual:my-table/events` として Worker に入れる。生成ファイルは置かない
 - **デプロイ**: Cloudflare Workers Builds だけ。main は本番、それ以外のブランチはプレビュー（`wrangler preview`）。GitHub Actions はチェックだけでデプロイしない。デプロイの経路を2本にしない（以前、2経路が互いに上書きして古いデータが本番に出た）

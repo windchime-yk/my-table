@@ -1,3 +1,6 @@
+// サーバー側の、複数のページで使うスタイル（hono/css）とテーマ。
+// 1つのページ・部品でしか使わないスタイルは、そのファイルに置く
+
 import { css } from "hono/css";
 
 /**
@@ -76,130 +79,7 @@ export const lead = css`
   color: var(--muted);
 `;
 
-export const section = css`
-  margin-top: 40px;
-`;
-
-export const heading = css`
-  margin: 0 0 12px;
-  font-size: 1.1rem;
-`;
-
-export const eventList = css`
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-`;
-
-export const eventCard = css`
-  display: grid;
-  gap: 2px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-  text-decoration: none;
-
-  &:hover {
-    border-color: var(--accent);
-  }
-`;
-
-export const eventName = css`
-  font-weight: 700;
-`;
-
-export const eventDates = css`
-  color: var(--muted);
-  font-size: 0.9rem;
-`;
-
 export const empty = css`
   margin: 0;
   color: var(--muted);
-`;
-
-export const steps = css`
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
-`;
-
-export const step = css`
-  position: relative;
-  padding: 12px 16px 12px 52px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-  counter-increment: step;
-
-  &::before {
-    content: counter(step);
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    display: grid;
-    place-items: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--accent-ink);
-    font-size: 0.8rem;
-    font-weight: 700;
-  }
-`;
-
-export const notes = css`
-  margin: 0;
-  padding-left: 1.2em;
-  color: var(--muted);
-  font-size: 0.9rem;
-`;
-
-export const footer = css`
-  padding: 20px 0 32px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 0.8rem;
-`;
-
-export const footerInner = css`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
-`;
-
-/** イベントページ。見出しまでの余白を TOP より詰める（スマホで枠が早く見えるように）。wrap のあとに組み合わせる */
-// 広い画面では、ステージを列にした横並び表示が入る幅にする（ブラウザ側の WIDE_QUERY と合わせる）
-export const eventMain = css`
-  padding-block: 20px 56px;
-
-  @media (min-width: 720px) {
-    max-width: 1200px;
-  }
-`;
-
-export const backLink = css`
-  margin: 0 0 12px;
-  color: var(--muted);
-  font-size: 0.85rem;
-`;
-
-export const eventAbout = css`
-  margin-top: 40px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 0.85rem;
-
-  & p {
-    margin: 0 0 8px;
-  }
 `;

@@ -1,24 +1,90 @@
-import { cx } from "hono/css";
+import { css, cx } from "hono/css";
 import type { FC } from "hono/jsx";
 import { Layout } from "../components/Layout.tsx";
 import { formatDateRange } from "../shared/date.ts";
 import type { EventSummary } from "../shared/event.ts";
-import {
-  empty,
-  eventCard,
-  eventDates,
-  eventList,
-  eventName,
-  heading,
-  lead,
-  main,
-  notes,
-  section,
-  step,
-  steps,
-  title,
-  wrap,
-} from "../styles.ts";
+import { empty, lead, main, title, wrap } from "../styles.ts";
+
+const section = css`
+  margin-top: 40px;
+`;
+
+const heading = css`
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+`;
+
+const eventList = css`
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+const eventCard = css`
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  text-decoration: none;
+
+  &:hover {
+    border-color: var(--accent);
+  }
+`;
+
+const eventName = css`
+  font-weight: 700;
+`;
+
+const eventDates = css`
+  color: var(--muted);
+  font-size: 0.9rem;
+`;
+
+const steps = css`
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+`;
+
+const step = css`
+  position: relative;
+  padding: 12px 16px 12px 52px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  counter-increment: step;
+
+  &::before {
+    content: counter(step);
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+`;
+
+const notes = css`
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--muted);
+  font-size: 0.9rem;
+`;
 
 export const Top: FC<{ events: EventSummary[] }> = ({ events }) => (
   <Layout>

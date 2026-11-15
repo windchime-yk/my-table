@@ -1,10 +1,38 @@
-import { cx } from "hono/css";
+import { css, cx } from "hono/css";
 import type { FC } from "hono/jsx";
 import { Layout } from "../components/Layout.tsx";
 import type { EventDoc } from "../shared/event.ts";
 import { APP_ELEMENT_ID, PAYLOAD_ELEMENT_ID, type EventPayload } from "../shared/payload.ts";
 import { safeJson } from "../shared/safe-json.ts";
-import { backLink, empty, eventAbout, eventMain, lead, title, wrap } from "../styles.ts";
+import { empty, lead, title, wrap } from "../styles.ts";
+
+/** イベントページ。見出しまでの余白を TOP より詰める（スマホで枠が早く見えるように）。wrap のあとに組み合わせる */
+// 広い画面では、ステージを列にした横並び表示が入る幅にする（ブラウザ側の WIDE_QUERY と合わせる）
+const eventMain = css`
+  padding-block: 20px 56px;
+
+  @media (min-width: 720px) {
+    max-width: 1200px;
+  }
+`;
+
+const backLink = css`
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+`;
+
+const eventAbout = css`
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+
+  & p {
+    margin: 0 0 8px;
+  }
+`;
 
 /** リンクにしてよい URL か。データの書き間違いで `javascript:` などがリンクにならないようにする */
 const isHttpUrl = (url: string): boolean => /^https?:\/\//.test(url);
