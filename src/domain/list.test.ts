@@ -74,4 +74,41 @@ describe("listGroups", () => {
       { start: 900, dayEvents: ["休憩"], rows: [] },
     ]);
   });
+
+  it("同時中継の枠は、中継先のステージで絞り込んだときにも出す", () => {
+    const relayDay: Day = {
+      date: "2026-12-05",
+      stages: [
+        {
+          id: "main",
+          name: "Main",
+          slots: [
+            {
+              id: "main-1200",
+              start: "12:00",
+              end: "13:00",
+              end_source: "explicit",
+              title: "Keynote",
+              category: "keynote",
+              simulcast_in: ["sub"],
+            },
+          ],
+        },
+        {
+          id: "sub",
+          name: "Sub",
+          slots: [
+            { id: "sub-1300", start: "13:00", end: "13:30", end_source: "explicit", title: "B", category: "talk" },
+          ],
+        },
+        { id: "lounge", name: "Lounge", slots: [] },
+      ],
+    };
+    const ids = (stageId: string | null) =>
+      listGroups(relayDay, stageId).flatMap((g) => g.rows.flatMap((r) => r.units.map((u) => u.id)));
+    expect(ids("sub")).toEqual(["main-1200", "sub-1300"]);
+    expect(ids("main")).toEqual(["main-1200"]);
+    expect(ids("lounge")).toEqual([]);
+    expect(ids(null)).toEqual(["main-1200", "sub-1300"]);
+  });
 });

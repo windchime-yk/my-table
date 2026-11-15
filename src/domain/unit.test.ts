@@ -113,3 +113,35 @@ describe("isRunning", () => {
     expect(isRunning(unit, null)).toBe(false);
   });
 });
+
+describe("同時中継", () => {
+  const relayDay: Day = {
+    date: "2026-12-05",
+    stages: [
+      {
+        id: "main",
+        name: "Main",
+        slots: [
+          {
+            id: "main-1200",
+            start: "12:00",
+            end: "13:00",
+            end_source: "explicit",
+            title: "Keynote",
+            category: "keynote",
+            simulcast_in: ["sub"],
+          },
+          { id: "main-1300", start: "13:00", end: "13:30", end_source: "explicit", title: "A", category: "talk" },
+        ],
+      },
+      { id: "sub", name: "Sub", slots: [] },
+    ],
+  };
+
+  it("中継先のステージを持つ。枠は1つのままで、選べる単位は増えない", () => {
+    const units = unitsForDay(relayDay);
+    expect(units.map((u) => u.id)).toEqual(["main-1200", "main-1300"]);
+    expect(units[0].relayStages.map((s) => s.id)).toEqual(["sub"]);
+    expect(units[1].relayStages).toEqual([]);
+  });
+});

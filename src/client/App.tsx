@@ -5,12 +5,14 @@ import { cx } from "hono/jsx/dom/css";
 import { currentDayDate, nowInZone, nowMinutesForDay, pickDayIndex } from "../domain/day.ts";
 import { buildExport, parseImport } from "../domain/export-file.ts";
 import {
+  closedBox,
   gridBox,
   gridHeight,
   gridOffset,
   gridRange,
   gridTicks,
   PX_PER_MINUTE,
+  relayRowsByStage,
   rowsByStage,
   TICK_MINUTES,
 } from "../domain/grid.ts";
@@ -488,6 +490,22 @@ const OverlapFlags: FC<{ overlaps: Overlap[] | undefined }> = ({ overlaps }) => 
   );
 };
 
+/** 同時中継先のステージ。中継があるときだけ出す */
+const Relay: FC<{ unit: Unit }> = ({ unit }) =>
+  unit.relayStages.length > 0 ? (
+    <span class={s.flags}>
+      <span class={s.flag}>同時中継: {unit.relayStages.map((stage) => stage.name).join(NAME_SEPARATOR)}</span>
+    </span>
+  ) : null;
+
+/** ブロックの中での順番（「1/3」）。何本目かが分かるようにする */
+const Order: FC<{ unit: Unit }> = ({ unit }) =>
+  unit.order ? (
+    <span class={s.talkOrder}>
+      {unit.order.index}/{unit.order.total}
+    </span>
+  ) : null;
+
 /** 進行中の印 */
 const Live: FC = () => <span class={s.live}>進行中</span>;
 
@@ -526,6 +544,7 @@ const UnitCard: FC<{ doc: EventDoc; unit: Unit; ctx: CardContext }> = ({ doc, un
       <span class={s.cardTitle}>{unitTitle(unit)}</span>
       {sub.length > 0 ? <span class={s.cardSub}>{sub.join(" · ")}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
+      <Relay unit={unit} />
       <OverlapFlags overlaps={ctx.overlaps.get(unit.id)} />
       <Check on={on} />
     </button>
@@ -553,6 +572,7 @@ const BlockCard: FC<{ doc: EventDoc; row: ListRow; ctx: CardContext }> = ({ doc,
       <span class={s.blockNote}>各トークの開始時刻は公開されていません。順番のみ表示しています。</span>
       {slot.note ? <span class={s.cardSub}>{slot.note}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
+      <Relay unit={first} />
       {units.map((unit) => {
         const on = ctx.selected.has(unit.id);
         return (
@@ -562,7 +582,10 @@ const BlockCard: FC<{ doc: EventDoc; row: ListRow; ctx: CardContext }> = ({ doc,
             aria-pressed={pressed(on)}
             onClick={() => ctx.toggle(unit.id)}
           >
-            <span class={s.talkTitle}>{unitTitle(unit)}</span>
+            <span class={s.talkTitle}>
+              <Order unit={unit} />
+              {unitTitle(unit)}
+            </span>
             {unit.item?.speakers?.length ? (
               <span class={s.cardSub}>{unit.item.speakers.join(NAME_SEPARATOR)}</span>
             ) : null}
@@ -590,6 +613,7 @@ const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; ctx: CardC
   if (!range) return <p class={s.empty}>この日の枠はまだありません。</p>;
 
   const rows = rowsByStage(day);
+  const relayRows = relayRowsByStage(day);
   const columns = day.stages
     .map((stage, index) => ({ stage, index, color: stageColor(stage, index) }))
     .filter(({ stage }) => stageId === null || stage.id === stageId);
@@ -654,11 +678,34 @@ const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; ctx: CardC
                   </div>
                 );
               })}
+            {/* ステージが閉まっている時間帯は、塗りつぶして枠がないことを示す */}
+            {(stage.closed ?? []).map((closed) => {
+              const box = closedBox(range, toMinutes(closed.start), toMinutes(closed.end));
+              return box ? (
+                <div class={cx(s.gridSlot, s.gridClosed)} style={boxStyle(box)}>
+                  クローズ
+                </div>
+              ) : null;
+            })}
             {rows[index].map((row) => {
               const first = row.units[0];
               return (
                 <div class={s.gridSlot} style={boxStyle(gridBox(range, first.start, first.end))}>
                   {row.slot.items ? <GridBlock row={row} ctx={ctx} /> : <GridCard doc={doc} unit={first} ctx={ctx} />}
+                </div>
+              );
+            })}
+            {/* 同時中継で映される枠は、中継先のステージの列にも出す。選ぶと元の枠が選ばれる */}
+            {relayRows[index].map((row) => {
+              const first = row.units[0];
+              const relayFrom = first.stage.name;
+              return (
+                <div class={s.gridSlot} style={boxStyle(gridBox(range, first.start, first.end))}>
+                  {row.slot.items ? (
+                    <GridBlock row={row} ctx={ctx} relayFrom={relayFrom} />
+                  ) : (
+                    <GridCard doc={doc} unit={first} ctx={ctx} relayFrom={relayFrom} />
+                  )}
                 </div>
               );
             })}
@@ -670,7 +717,13 @@ const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; ctx: CardC
 };
 
 /** 横並び表示の枠。高さは枠の時間で決まるので、収まらない分は隠す（全文は title で読める） */
-const GridCard: FC<{ doc: EventDoc; unit: Unit; ctx: CardContext }> = ({ doc, unit, ctx }) => {
+const GridCard: FC<{
+  doc: EventDoc;
+  unit: Unit;
+  ctx: CardContext;
+  /** 中継先のステージの列に出すときの、元のステージ名 */
+  relayFrom?: string;
+}> = ({ doc, unit, ctx, relayFrom }) => {
   const { slot } = unit;
   const on = ctx.selected.has(unit.id);
   const running = isRunning(unit, ctx.nowMinutes);
@@ -679,7 +732,7 @@ const GridCard: FC<{ doc: EventDoc; unit: Unit; ctx: CardContext }> = ({ doc, un
   return (
     <button
       type="button"
-      class={cx(s.card, s.cardButton, s.gridCard, on && s.cardOn, running && s.cardLive)}
+      class={cx(s.card, s.cardButton, s.gridCard, relayFrom && s.relay, on && s.cardOn, running && s.cardLive)}
       aria-pressed={pressed(on)}
       title={title}
       onClick={() => ctx.toggle(unit.id)}
@@ -687,6 +740,7 @@ const GridCard: FC<{ doc: EventDoc; unit: Unit; ctx: CardContext }> = ({ doc, un
       <span class={s.cardHead}>
         <span class={s.cardTime}>{timeLabel(unit)}</span>
         {running ? <Live /> : null}
+        {relayFrom ? <span class={s.relayBadge}>中継 {relayFrom}</span> : null}
         {slot.kind_label ? <span class={s.muted}>{slot.kind_label}</span> : null}
       </span>
       <span class={cx(s.cardTitle, s.gridCardTitle)}>{title}</span>
@@ -701,15 +755,16 @@ const GridCard: FC<{ doc: EventDoc; unit: Unit; ctx: CardContext }> = ({ doc, un
 };
 
 /** 横並び表示のブロック。トーク1本ずつを1行で出し、収まらないときは中でスクロールする */
-const GridBlock: FC<{ row: ListRow; ctx: CardContext }> = ({ row, ctx }) => {
+const GridBlock: FC<{ row: ListRow; ctx: CardContext; relayFrom?: string }> = ({ row, ctx, relayFrom }) => {
   const { slot, units } = row;
   const heading = [timeLabel(units[0]), slot.title, slot.kind_label].filter(Boolean).join(" · ");
   const running = isRunning(units[0], ctx.nowMinutes);
   return (
-    <div class={cx(s.card, s.gridBlock, running && s.cardLive)}>
+    <div class={cx(s.card, s.gridBlock, relayFrom && s.relay, running && s.cardLive)}>
       <span class={cx(s.cardHead, s.muted)}>
         {heading}
         {running ? <Live /> : null}
+        {relayFrom ? <span class={s.relayBadge}>中継 {relayFrom}</span> : null}
       </span>
       {units.map((unit) => {
         const on = ctx.selected.has(unit.id);
@@ -722,7 +777,10 @@ const GridBlock: FC<{ row: ListRow; ctx: CardContext }> = ({ row, ctx }) => {
             title={title}
             onClick={() => ctx.toggle(unit.id)}
           >
-            <span class={cx(s.talkTitle, s.oneLine)}>{title}</span>
+            <span class={cx(s.talkTitle, s.oneLine)}>
+              <Order unit={unit} />
+              {title}
+            </span>
             <span class={cx(s.check, s.checkMini, on && s.checkOn)} aria-hidden="true">
               {on ? "✓" : "+"}
             </span>
