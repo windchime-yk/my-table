@@ -29,7 +29,7 @@ pnpm dev
 - [イベントを追加する](.agents/skills/add-event/SKILL.md)（`add-event`）: 公式のタイムテーブルから `events/<event-id>.json` を作る
 - [イベントのデータを更新する](.agents/skills/update-event/SKILL.md)（`update-event`）: 押し・時刻変更・リトライ・キャンセルを反映する
 
-Skill の本体は `.agents/skills/` にあり、Codex などはここから読む。Claude Code 用の `.claude/skills` は、そこへのシンボリックリンク。
+Skill の本体は `.agents/skills/` にあり、Codex などはここから読む。Claude Code は `.claude/skills/` を読むので、そこに Skill ごとのシンボリックリンクを置いている。
 
 ## スクリプト
 
