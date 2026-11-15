@@ -16,7 +16,7 @@ import {
 } from "../domain/grid.ts";
 import { listGroups, type ListGroup, type ListRow } from "../domain/list.ts";
 import { findOverlaps, type Overlap } from "../domain/overlap.ts";
-import { selectableIds, toggleSelected } from "../domain/ctx.ts";
+import { selectableIds, toggleSelected } from "../domain/selection.ts";
 import { stageColor } from "../domain/stage-color.ts";
 import { formatMinutes, toMinutes } from "../domain/time.ts";
 import { isRunning, NAME_SEPARATOR, timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
