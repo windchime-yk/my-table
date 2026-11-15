@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Day } from "../shared/event.ts";
-import { timeLabel, unitsForDay, unitTitle } from "./unit.ts";
+import { isRunning, timeLabel, unitsForDay, unitTitle } from "./unit.ts";
 
 const day: Day = {
   date: "2026-12-05",
@@ -96,5 +96,20 @@ describe("unitTitle", () => {
   it("枠は枠の名前、ブロックの中のトークはトークのタイトル", () => {
     const titles = Object.fromEntries(unitsForDay(day).map((u) => [u.id, unitTitle(u)]));
     expect(titles).toMatchObject({ "main-1230": "A", "talk-2": "Talk 2" });
+  });
+});
+
+describe("isRunning", () => {
+  const unit = { start: 750, end: 780 };
+
+  it("開始から終了の直前までが進行中", () => {
+    expect(isRunning(unit, 749)).toBe(false);
+    expect(isRunning(unit, 750)).toBe(true);
+    expect(isRunning(unit, 779)).toBe(true);
+    expect(isRunning(unit, 780)).toBe(false);
+  });
+
+  it("その日が「いま」でなければ進行中にしない", () => {
+    expect(isRunning(unit, null)).toBe(false);
   });
 });

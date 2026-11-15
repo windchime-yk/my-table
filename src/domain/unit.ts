@@ -61,3 +61,11 @@ export function timeLabel(unit: Pick<Unit, "start" | "end" | "endExplicit">): st
 export function unitTitle(unit: Pick<Unit, "slot" | "item">): string {
   return unit.item ? unit.item.title : (unit.slot.title ?? unit.slot.kind_label ?? "");
 }
+
+/**
+ * いま進行中か。nowMinutes は、その日の 0:00 からの分（その日が「いま」でなければ null）。
+ * 終了時刻が推定の枠も、判定には推定の終了時刻を使う（画面には出さない）
+ */
+export function isRunning(unit: Pick<Unit, "start" | "end">, nowMinutes: number | null): boolean {
+  return nowMinutes !== null && unit.start <= nowMinutes && nowMinutes < unit.end;
+}
