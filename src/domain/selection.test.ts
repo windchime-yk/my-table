@@ -59,9 +59,10 @@ describe("selectableIds", () => {
   });
 });
 
+const stored = (version: string, selected: string[]) => ({ version, selected, updatedAt: "" });
+
 describe("reconcile", () => {
   const valid = new Set(["a1", "b2", "c3"]);
-  const stored = (version: string, selected: string[]) => ({ version, selected, updatedAt: "" });
 
   it("なくなった単位だけを外し、外れた件数を返す", () => {
     expect(reconcile(stored("v1", ["a1", "gone", "b2"]), "v2", valid)).toEqual({
