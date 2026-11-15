@@ -65,7 +65,7 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 - **Node.js**: `.node-version`（最新の Active LTS）。スクリプトは TypeScript のまま Node で直接実行する（型を取り除くだけで動く書き方。`tsx` などは入れない。import には `.ts` 拡張子を付ける）
 - **lint / format**: Oxlint ＋ Oxfmt。型チェックも Oxlint（type-aware）で行い、`tsc` は使わない（TypeScript 7 前提）
 - **テスト**: Vitest。テストは実装の隣に `*.test.ts(x)` で置く。Hono のページは `app.request()` で確かめる
-- **スキーマ**: Zod 4 の `schema/v1/event.ts` が唯一の定義元。型は `z.output` で作り、手で型を書かない。JSON Schema は `pnpm schema` で生成してコミットする（一致はテストで確かめる）。zod は、ビルド時のデータのチェックと、ブラウザ側で利用者のデータ（localStorage・書き出しファイル）を読むときに使う。Worker には入れない（`src/app.tsx` から zod を使うファイルを import しない）
+- **スキーマ**: Zod 4 の `schema/v1/event.ts` が唯一の定義元。型は `z.output` で作り、手で型を書かない。JSON Schema は `pnpm schema` で生成してコミットする（一致はテストで確かめる）。zod は、ビルド時のデータのチェックと、ブラウザ側で利用者のデータ（localStorage・書き出しファイル）を読むときに使う。ブラウザ側は軽量版の `zod/mini` を使う（`zod` を import すると JS が gzip で約 25 kB 増える）。Worker には入れない（`src/app.tsx` から zod を使うファイルを import しない）
 - **データの同梱**: Vite プラグインが `events/*.json` をチェックし、公開分だけを仮想モジュール `virtual:my-table/events` として Worker に入れる。生成ファイルは置かない
 - **デプロイ**: Cloudflare Workers Builds だけ。main は本番、それ以外のブランチはプレビュー（`wrangler preview`）。GitHub Actions はチェックだけでデプロイしない。デプロイの経路を2本にしない（以前、2経路が互いに上書きして古いデータが本番に出た）
 
