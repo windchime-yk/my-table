@@ -57,6 +57,8 @@ src/shared/                   型と、サーバー・ブラウザの両方で�
 src/styles.ts                 テーマと、サーバー側の複数のページで使うスタイル（hono/css）
 src/client/styles.ts          ブラウザ側の画面全体で使うスタイル
 docs/SPEC.md                  設計・データの流れ・スキーマ・データ作成の指針
+.agents/skills/               AI エージェント用の Skill（イベントの追加 add-event、更新 update-event）
+.claude/skills                .agents/skills へのシンボリックリンク（Claude Code 用。中身は二重に持たない）
 ```
 
 ## 技術の決定
@@ -92,7 +94,7 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 
 ## データのルール
 
-詳しくは docs/SPEC.md の「イベントデータ」。特に守ること:
+詳しくは docs/SPEC.md の「イベントデータ」。イベントを追加・更新するときは、Skill（`add-event`・`update-event`）の手順で進める。決まりを変えたら、SPEC とあわせて Skill も直す。特に守ること:
 
 - 枠の `id` は一度公開したら、時刻やステージが変わっても変えない（利用者の保存がこの ID に紐づく）
 - 押しは、まだ始まっていない枠の時刻をずらし、`note` に根拠（公式告知の日時）を残す
