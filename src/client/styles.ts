@@ -19,6 +19,60 @@ export const dayLine = css`
   font-weight: 700;
 `;
 
+// ---------- 表示の切り替え ----------
+
+/** スクロールしても切り替えられるよう、上に固定する */
+export const views = css`
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+`;
+
+export const tab = css`
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+`;
+
+export const tabOn = css`
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+`;
+
+/** マイテーブルの件数 */
+export const count = css`
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.8rem;
+`;
+
+/** 保存できなかったときなどの知らせ */
+export const warning = css`
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 0.9rem;
+`;
+
 // ---------- ステージの絞り込み ----------
 
 /** 数が多いときは横にスクロールする */
@@ -75,9 +129,11 @@ export const dayEvent = css`
   font-size: 0.85rem;
 `;
 
-// ---------- 枠 ----------
+// ---------- 選べる単位 ----------
 
+/** カードの中身は button の中にも置けるよう span で組むので、縦に並ぶよう grid にする */
 export const card = css`
+  position: relative;
   display: grid;
   gap: 2px;
   margin: 0;
@@ -86,10 +142,23 @@ export const card = css`
   border-left: 6px solid var(--stage, var(--line));
   border-radius: 12px;
   background: var(--surface);
+`;
 
-  & p {
-    margin: 0;
-  }
+/** タップで選べるカード。右に、選んでいるかの印を置く余白を取る */
+export const cardButton = css`
+  width: 100%;
+  padding-right: 52px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+`;
+
+/** 選んでいる状態。ステージの色を薄く敷く */
+export const cardOn = css`
+  border-color: var(--stage, var(--accent));
+  background: color-mix(in oklch, var(--stage, var(--accent)) 16%, var(--surface));
 `;
 
 export const cardHead = css`
@@ -135,6 +204,27 @@ export const flag = css`
   font-size: 0.75rem;
 `;
 
+export const check = css`
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  font-weight: 700;
+`;
+
+export const checkOn = css`
+  border-color: var(--stage, var(--accent));
+  background: var(--stage, var(--accent));
+  color: var(--bg);
+`;
+
 // ---------- ブロック ----------
 
 export const block = css`
@@ -146,15 +236,47 @@ export const blockNote = css`
   font-size: 0.8rem;
 `;
 
-export const talks = css`
+/** ブロックの中のトーク1本。タップで選べる */
+export const talk = css`
+  position: relative;
   display: grid;
-  gap: 6px;
-  margin: 0;
-  padding-left: 1.4em;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 52px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 `;
 
-export const talk = css`
-  & > span {
-    display: block;
-  }
+export const talkTitle = css`
+  font-weight: 700;
+  line-height: 1.35;
+`;
+
+// ---------- マイテーブル ----------
+
+export const stack = css`
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+`;
+
+export const emptyBox = css`
+  margin: 0;
+  padding: 32px 16px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  text-align: center;
+`;
+
+export const note = css`
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
 `;

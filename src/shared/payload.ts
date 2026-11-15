@@ -1,6 +1,7 @@
 // サーバーからブラウザへ渡す初期データ。ページの <script type="application/json"> に埋め込む
 
 import type { EventDoc } from "./event.ts";
+import { isRecord } from "./guard.ts";
 
 export interface EventPayload {
   doc: EventDoc;
@@ -10,8 +11,6 @@ export interface EventPayload {
 export const PAYLOAD_ELEMENT_ID = "payload";
 /** ブラウザ側の画面を描く要素の id */
 export const APP_ELEMENT_ID = "app";
-
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 
 /**
  * 埋め込まれた初期データかどうかを確かめる。
