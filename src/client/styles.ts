@@ -83,6 +83,10 @@ export const views = css`
   background: var(--bg);
 `;
 
+export const viewsStatic = css`
+  position: static;
+`;
+
 export const tab = css`
   flex: 1;
   padding: 10px 12px;
@@ -333,7 +337,186 @@ export const talkTitle = css`
   line-height: 1.35;
 `;
 
+// ---------- 横並び表示（広い画面） ----------
+
+/** 時刻の列と、ステージの列。見出しと本体で同じ列の割り方にする */
+const gridColumns = `
+  display: grid;
+  grid-template-columns: var(--axis) repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gap);
+`;
+
+/** --cols（列の数）・--h（全体の高さ）・--tick（目盛り1つ分の高さ）は、要素の style で渡す */
+export const grid = css`
+  --axis: 56px;
+  --gap: 8px;
+  margin-top: 8px;
+`;
+
+/** ステージの見出し。スクロールしても上に固定する */
+export const gridHead = css`
+  ${gridColumns}
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  padding: 8px 0;
+  background: var(--bg);
+`;
+
+export const gridStage = css`
+  padding: 4px 8px;
+  overflow: hidden;
+  border-bottom: 3px solid var(--stage);
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+/** 目盛りの線は、背景の繰り返しで引く */
+export const gridBody = css`
+  ${gridColumns}
+  position: relative;
+  height: var(--h);
+  margin-bottom: 24px;
+  background-image: repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px var(--tick));
+`;
+
+export const gridCol = css`
+  position: relative;
+`;
+
+export const gridTime = css`
+  position: absolute;
+  left: 0;
+  padding-right: 4px;
+  transform: translateY(-50%);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+`;
+
+/** 正時は強調する */
+export const gridTimeHour = css`
+  color: var(--ink);
+  font-weight: 700;
+`;
+
+/** 枠の置き場所。位置と高さは要素の style で渡す */
+export const gridSlot = css`
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+`;
+
+/** ステージ別の休憩など、選べないもの */
+export const gridMarker = css`
+  z-index: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: color-mix(in oklch, var(--muted) 8%, transparent);
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+`;
+
+/** 列をまたぐものを置く層。時刻の列を除いた幅にする */
+export const gridLayer = css`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--axis) + var(--gap));
+  right: 0;
+  pointer-events: none;
+`;
+
+/** 全ステージ共通の開場・休憩などの帯 */
+export const gridBand = css`
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 2px 8px;
+  overflow: hidden;
+  border-top: 1px dashed var(--muted);
+  background: color-mix(in oklch, var(--muted) 12%, transparent);
+  color: var(--muted);
+  font-size: 0.75rem;
+`;
+
+/** 終了のないものは線だけにする。文字は線の下にはみ出して出す */
+export const gridBandLine = css`
+  overflow: visible;
+  background: none;
+`;
+
+/** 横並び表示の枠。高さいっぱいに広げ、収まらない分は隠す */
+export const gridCard = css`
+  flex: 1;
+  align-content: start;
+  gap: 0;
+  min-height: 0;
+  padding: 6px 34px 6px 10px;
+  overflow: hidden;
+`;
+
+export const gridCardTitle = css`
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.95rem;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+`;
+
+export const oneLine = css`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+export const checkSmall = css`
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  margin-top: 0;
+  font-size: 0.8rem;
+`;
+
+/** 横並び表示のブロック。トークが収まらないときは中でスクロールする */
+export const gridBlock = css`
+  flex: 1;
+  align-content: start;
+  gap: 2px;
+  min-height: 0;
+  padding: 4px 6px;
+  overflow-y: auto;
+`;
+
+export const gridTalk = css`
+  padding: 2px 28px 2px 8px;
+  font-size: 0.85rem;
+`;
+
+export const checkMini = css`
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  font-size: 0.7rem;
+`;
+
 // ---------- マイテーブル ----------
+
+/** 広い画面でも読みやすい幅に収め、中央に寄せる */
+export const mineColumn = css`
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+`;
 
 export const stack = css`
   display: grid;

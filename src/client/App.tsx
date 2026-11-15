@@ -3,11 +3,21 @@ import type { FC } from "hono/jsx";
 import { useEffect, useMemo, useRef, useState } from "hono/jsx";
 import { cx } from "hono/jsx/dom/css";
 import { nowInZone, pickDayIndex } from "../domain/day.ts";
+import {
+  gridBox,
+  gridHeight,
+  gridOffset,
+  gridRange,
+  gridTicks,
+  PX_PER_MINUTE,
+  rowsByStage,
+  TICK_MINUTES,
+} from "../domain/grid.ts";
 import { listGroups, type ListGroup, type ListRow } from "../domain/list.ts";
 import { findOverlaps, type Overlap } from "../domain/overlap.ts";
 import { toggleSelected } from "../domain/selection.ts";
 import { stageColor } from "../domain/stage-color.ts";
-import { formatMinutes } from "../domain/time.ts";
+import { formatMinutes, toMinutes } from "../domain/time.ts";
 import { timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
 import { shortDate } from "../shared/date.ts";
 import type { Day, DayEvent, EventDoc } from "../shared/event.ts";
@@ -24,6 +34,9 @@ interface Selection {
   overlaps: Map<string, Overlap[]>;
   toggle: (id: string) => void;
 }
+
+/** この幅以上の画面では、ステージを列にした横並び表示にする */
+const WIDE_QUERY = "(min-width: 720px)";
 
 /** ステージの色を、子孫の要素が使う CSS 変数として渡す */
 const stageStyle = (color: string) => `--stage:${color}`;
@@ -57,7 +70,16 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
   const [notice, setNotice] = useState(initialNotice);
   const [saveFailed, setSaveFailed] = useState(initialSaveFailed);
 
+  const [wide, setWide] = useState(() => window.matchMedia(WIDE_QUERY).matches);
   const dayNavRef = useRef<HTMLElement>(null);
+
+  // 画面の幅が変わったら（端末の回転、ウィンドウの大きさの変更）、表示を切り替える
+  useEffect(() => {
+    const media = window.matchMedia(WIDE_QUERY);
+    const onChange = () => setWide(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
 
   // ブラウザの「戻る」「進む」で ?day= が変わったら、表示する日を合わせる
   useEffect(() => {
@@ -107,6 +129,9 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
     history.pushState(null, "", url);
   };
 
+  /** 横並び表示にするか。スマホ（狭い画面）とマイテーブルはリストのまま */
+  const grid = wide && view === "all";
+
   return (
     <>
       {doc.days.length > 1 ? (
@@ -129,7 +154,8 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
         <p class={s.dayLine}>{[day.label, shortDate(day.date)].filter(Boolean).join(" · ")}</p>
       )}
 
-      <nav class={s.views} aria-label="表示">
+      {/* 横並び表示ではステージの見出しを上に固定するので、表示の切り替えは固定しない */}
+      <nav class={cx(s.views, grid && s.viewsStatic)} aria-label="表示">
         <button
           type="button"
           class={cx(s.tab, view === "all" && s.tabOn)}
@@ -167,7 +193,11 @@ export const App: FC<AppProps> = ({ doc, initialSelected, initialNotice, initial
       ) : (
         <>
           <StageChips day={day} stageId={stageId} onChange={setStageFilter} />
-          <ListView doc={doc} day={day} groups={groups} selection={selection} />
+          {grid ? (
+            <GridView doc={doc} day={day} stageId={stageId} selection={selection} />
+          ) : (
+            <ListView doc={doc} day={day} groups={groups} selection={selection} />
+          )}
         </>
       )}
     </>
@@ -357,10 +387,161 @@ const BlockCard: FC<{ doc: EventDoc; row: ListRow; selection: Selection }> = ({ 
   );
 };
 
+// ---------- タイムテーブル（横並び。広い画面） ----------
+
+/** 位置と高さを style の文字列にする */
+const boxStyle = (box: { top: number; height: number }) => `top:${box.top}px;height:${box.height}px`;
+
+const GridView: FC<{ doc: EventDoc; day: Day; stageId: string | null; selection: Selection }> = ({
+  doc,
+  day,
+  stageId,
+  selection,
+}) => {
+  const range = gridRange(day);
+  if (!range) return <p class={s.empty}>この日の枠はまだありません。</p>;
+
+  const rows = rowsByStage(day);
+  const columns = day.stages
+    .map((stage, index) => ({ stage, index, color: stageColor(stage, index) }))
+    .filter(({ stage }) => stageId === null || stage.id === stageId);
+  const dayEvents = day.day_events ?? [];
+  const vars = `--cols:${columns.length};--h:${gridHeight(range)}px;--tick:${TICK_MINUTES * PX_PER_MINUTE}px`;
+
+  return (
+    <div class={s.grid} style={vars}>
+      <div class={s.gridHead}>
+        <span />
+        {columns.map(({ stage, color }) => (
+          <span class={s.gridStage} style={stageStyle(color)}>
+            {stage.name}
+          </span>
+        ))}
+      </div>
+      <div class={s.gridBody}>
+        <div class={s.gridCol}>
+          {gridTicks(range).map((tick) => (
+            <span class={cx(s.gridTime, tick % 60 === 0 && s.gridTimeHour)} style={`top:${gridOffset(range, tick)}px`}>
+              {formatMinutes(tick)}
+            </span>
+          ))}
+        </div>
+
+        {/* 全ステージ共通の開場・休憩などは、列をまたぐ帯にする */}
+        <div class={s.gridLayer}>
+          {dayEvents
+            .filter((dayEvent) => !dayEvent.stages?.length)
+            .map((dayEvent) => {
+              const start = toMinutes(dayEvent.start);
+              const end = dayEvent.end ? toMinutes(dayEvent.end) : start;
+              const height = Math.max((end - start) * PX_PER_MINUTE, 2);
+              return (
+                <div
+                  class={cx(s.gridBand, end === start && s.gridBandLine)}
+                  style={`top:${gridOffset(range, start)}px;height:${height}px`}
+                >
+                  {dayEvent.title}
+                  {dayEvent.end ? ` 〜${dayEvent.end}` : ""}
+                </div>
+              );
+            })}
+        </div>
+
+        {columns.map(({ stage, index, color }) => (
+          <div class={s.gridCol} style={stageStyle(color)}>
+            {/* ステージ別の休憩などは、そのステージの列の中に出す。終了がなければ目盛り1つ分の高さにする */}
+            {dayEvents
+              .filter((dayEvent) => dayEvent.stages?.includes(stage.id))
+              .map((dayEvent) => {
+                const start = toMinutes(dayEvent.start);
+                const end = dayEvent.end ? toMinutes(dayEvent.end) : start + TICK_MINUTES;
+                return (
+                  <div class={cx(s.gridSlot, s.gridMarker)} style={boxStyle(gridBox(range, start, end))}>
+                    {dayEvent.title}
+                  </div>
+                );
+              })}
+            {rows[index].map((row) => {
+              const first = row.units[0];
+              return (
+                <div class={s.gridSlot} style={boxStyle(gridBox(range, first.start, first.end))}>
+                  {row.slot.items ? (
+                    <GridBlock row={row} selection={selection} />
+                  ) : (
+                    <GridCard doc={doc} unit={first} selection={selection} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/** 横並び表示の枠。高さは枠の時間で決まるので、収まらない分は隠す（全文は title で読める） */
+const GridCard: FC<{ doc: EventDoc; unit: Unit; selection: Selection }> = ({ doc, unit, selection }) => {
+  const { slot } = unit;
+  const on = selection.selected.has(unit.id);
+  const title = unitTitle(unit);
+  const sub = [slot.subtitle, slot.note, slot.speakers?.join("・")].filter(Boolean);
+  return (
+    <button
+      type="button"
+      class={cx(s.card, s.cardButton, s.gridCard, on && s.cardOn)}
+      aria-pressed={pressed(on)}
+      title={title}
+      onClick={() => selection.toggle(unit.id)}
+    >
+      <span class={s.cardHead}>
+        <span class={s.cardTime}>{timeLabel(unit)}</span>
+        {slot.kind_label ? <span class={s.muted}>{slot.kind_label}</span> : null}
+      </span>
+      <span class={cx(s.cardTitle, s.gridCardTitle)}>{title}</span>
+      {sub.length > 0 ? <span class={cx(s.cardSub, s.oneLine)}>{sub.join(" · ")}</span> : null}
+      <Tags doc={doc} tags={slot.tags} />
+      <OverlapFlags overlaps={selection.overlaps.get(unit.id)} />
+      <span class={cx(s.check, s.checkSmall, on && s.checkOn)} aria-hidden="true">
+        {on ? "✓" : "+"}
+      </span>
+    </button>
+  );
+};
+
+/** 横並び表示のブロック。トーク1本ずつを1行で出し、収まらないときは中でスクロールする */
+const GridBlock: FC<{ row: ListRow; selection: Selection }> = ({ row, selection }) => {
+  const { slot, units } = row;
+  const heading = [timeLabel(units[0]), slot.title, slot.kind_label].filter(Boolean).join(" · ");
+  return (
+    <div class={cx(s.card, s.gridBlock)}>
+      <span class={cx(s.cardHead, s.muted)}>{heading}</span>
+      {units.map((unit) => {
+        const on = selection.selected.has(unit.id);
+        const title = unitTitle(unit);
+        return (
+          <button
+            type="button"
+            class={cx(s.talk, s.gridTalk, on && s.cardOn)}
+            aria-pressed={pressed(on)}
+            title={title}
+            onClick={() => selection.toggle(unit.id)}
+          >
+            <span class={cx(s.talkTitle, s.oneLine)}>{title}</span>
+            <span class={cx(s.check, s.checkMini, on && s.checkOn)} aria-hidden="true">
+              {on ? "✓" : "+"}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
 // ---------- マイテーブル ----------
 
 const MineView: FC<{ doc: EventDoc; units: Unit[]; selection: Selection }> = ({ doc, units, selection }) => (
-  <div class={s.stack}>
+  <div class={cx(s.stack, s.mineColumn)}>
     {units.length > 0 ? (
       units.map((unit) => <UnitCard doc={doc} unit={unit} selection={selection} />)
     ) : (
