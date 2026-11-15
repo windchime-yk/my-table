@@ -176,9 +176,14 @@ export const footerInner = css`
   gap: 8px;
 `;
 
-/** イベントページ。見出しまでの余白を TOP より詰める（スマホで枠が早く見えるように） */
+/** イベントページ。見出しまでの余白を TOP より詰める（スマホで枠が早く見えるように）。wrap のあとに組み合わせる */
+// 広い画面では、ステージを列にした横並び表示が入る幅にする（ブラウザ側の WIDE_QUERY と合わせる）
 export const eventMain = css`
   padding-block: 20px 56px;
+
+  @media (min-width: 720px) {
+    max-width: 1200px;
+  }
 `;
 
 export const backLink = css`
