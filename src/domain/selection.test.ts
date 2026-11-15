@@ -26,9 +26,14 @@ describe("buildStored / parseStored", () => {
     expect(parseStored('{"version":"v","selected":"a"}')).toBeNull();
   });
 
-  it("文字列でない ID と重複を取り除く", () => {
-    const stored = parseStored('{"version":"v","selected":["a",1,null,"b","a"]}');
+  it("重複を取り除く", () => {
+    const stored = parseStored('{"version":"v","selected":["a","b","a"]}');
     expect(stored).toEqual({ version: "v", selected: ["a", "b"], updatedAt: "" });
+  });
+
+  it("文字列でない ID が混ざっているときは null", () => {
+    expect(parseStored('{"version":"v","selected":["a",1]}')).toBeNull();
+    expect(parseStored('{"version":"v","selected":["a",null]}')).toBeNull();
   });
 });
 

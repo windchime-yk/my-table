@@ -4,10 +4,8 @@ import { z } from "zod";
 import type { EventDoc } from "../shared/event.ts";
 import { unitsForDay } from "./unit.ts";
 
-/** 選んだ単位の ID の並び。文字列でないものと重複は取り除く（ID が一部壊れていても、残りは生かす） */
-export const selectedIdsSchema = z
-  .array(z.unknown())
-  .transform((ids) => [...new Set(ids.filter((id): id is string => typeof id === "string"))]);
+/** 選んだ単位の ID の並び。重複は取り除く */
+export const selectedIdsSchema = z.array(z.string()).transform((ids) => [...new Set(ids)]);
 
 /** localStorage に保存する形 */
 const storedSchema = z.object({
@@ -31,8 +29,7 @@ export function buildStored(version: string, selected: string[], now: Date): Sto
 
 /**
  * localStorage から読んだ文字列を、保存した形として読む。
- * 壊れている・形が違うときは null（何も選んでいない状態から始める）。
- * 文字列でない ID と重複は取り除く
+ * 壊れている・形が違うときは null（何も選んでいない状態から始める）。重複は取り除く
  */
 export function parseStored(raw: string | null): Stored | null {
   if (!raw) return null;

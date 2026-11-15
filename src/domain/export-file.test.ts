@@ -42,8 +42,8 @@ describe("parseImport", () => {
     });
   });
 
-  it("重複と、文字列でない ID は取り除く", () => {
-    expect(parseImport(file({ selected: ["a1", "a1", 1, null] }), doc, valid)).toMatchObject({
+  it("重複は取り除く", () => {
+    expect(parseImport(file({ selected: ["a1", "a1"] }), doc, valid)).toMatchObject({
       ok: true,
       selected: ["a1"],
       removed: 0,
@@ -64,6 +64,7 @@ describe("parseImport", () => {
     expect(parseImport(file({ eventId: 1 }), doc, valid)).toEqual(invalid);
     expect(parseImport(file({ version: undefined }), doc, valid)).toEqual(invalid);
     expect(parseImport(file({ selected: "a1" }), doc, valid)).toEqual(invalid);
+    expect(parseImport(file({ selected: ["a1", 1] }), doc, valid)).toEqual(invalid);
   });
 
   it("localStorage の保存の形（書き出しファイルではない）は invalid", () => {

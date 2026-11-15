@@ -1,7 +1,7 @@
-// サーバーからブラウザへ渡す初期データ。ページの <script type="application/json"> に埋め込む
+// サーバーからブラウザへ渡す初期データ。ページの <script type="application/json"> に埋め込む。
+// このファイルは Worker からも読み込むので、zod を import しない（読み取りは src/client/payload.ts）
 
 import type { EventDoc } from "./event.ts";
-import { isRecord } from "./guard.ts";
 
 export interface EventPayload {
   doc: EventDoc;
@@ -11,15 +11,3 @@ export interface EventPayload {
 export const PAYLOAD_ELEMENT_ID = "payload";
 /** ブラウザ側の画面を描く要素の id */
 export const APP_ELEMENT_ID = "app";
-
-/**
- * 埋め込まれた初期データかどうかを確かめる。
- * 中身はビルド時にスキーマでチェック済みなので、ここでは形の入口だけを見る（zod はブラウザに入れない）
- */
-export function isEventPayload(value: unknown): value is EventPayload {
-  if (!isRecord(value) || !isRecord(value.doc)) return false;
-  const { doc } = value;
-  return (
-    typeof doc.id === "string" && typeof doc.version === "string" && isRecord(doc.event) && Array.isArray(doc.days)
-  );
-}
