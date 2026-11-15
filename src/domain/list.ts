@@ -20,7 +20,8 @@ export interface ListGroup {
 
 /**
  * 1日分を開始時刻順のまとまりにする。
- * stageId を渡すとそのステージだけに絞る。全ステージ共通の day_events は絞り込んでも残す
+ * stageId を渡すとそのステージだけに絞る（同時中継先のステージで絞ったときは、中継される枠も入る）。
+ * 全ステージ共通の day_events は絞り込んでも残す
  */
 export function listGroups(day: Day, stageId: string | null): ListGroup[] {
   const groups = new Map<number, ListGroup>();
@@ -33,7 +34,9 @@ export function listGroups(day: Day, stageId: string | null): ListGroup[] {
   };
 
   for (const unit of unitsForDay(day)) {
-    if (stageId !== null && unit.stage.id !== stageId) continue;
+    // 同時中継の枠は、中継先のステージで絞り込んだときにも出す
+    const onStage = unit.stage.id === stageId || unit.relayStages.some((stage) => stage.id === stageId);
+    if (stageId !== null && !onStage) continue;
     const { rows } = groupAt(unit.start);
     const row = rows.find((r) => r.slot === unit.slot);
     if (row) row.units.push(unit);

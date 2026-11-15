@@ -353,6 +353,15 @@ export const talk = css`
   -webkit-tap-highlight-color: transparent;
 `;
 
+/** ブロックの中での順番（「1/3」） */
+export const talkOrder = css`
+  margin-right: 6px;
+  color: var(--muted);
+  font-size: 0.8em;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+`;
+
 export const talkTitle = css`
   font-weight: 700;
   line-height: 1.35;
@@ -443,6 +452,35 @@ export const gridMarker = css`
   color: var(--muted);
   font-size: 0.8rem;
   text-align: center;
+`;
+
+/** ステージが閉まっている時間帯。斜線で塗りつぶす */
+export const gridClosed = css`
+  z-index: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklch, var(--muted) 18%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+  color: var(--muted);
+  font-size: 0.8rem;
+`;
+
+/** 中継先のステージの列に出す枠。元の枠と区別できるよう、破線にして地の色を抜く */
+export const relay = css`
+  border-style: dashed;
+  border-left-style: dashed;
+  background: var(--bg);
+`;
+
+export const relayBadge = css`
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.7rem;
 `;
 
 /** 列をまたぐものを置く層。時刻の列を除いた幅にする */

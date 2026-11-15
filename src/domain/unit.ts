@@ -17,6 +17,8 @@ export interface Unit {
   item: Item | null;
   /** ブロックの中での順番（1 始まり）と本数。枠そのものなら null */
   order: { index: number; total: number } | null;
+  /** 同時中継先のステージ（simulcast_in）。中継がなければ空 */
+  relayStages: Stage[];
   /** 開始・終了（その日の 0:00 からの分）。ブロックの中のトークは、枠の時刻をそのまま持つ */
   start: number;
   end: number;
@@ -32,6 +34,7 @@ export function unitsForDay(day: Day): Unit[] {
         stage,
         stageIndex,
         slot,
+        relayStages: (slot.simulcast_in ?? []).flatMap((id) => day.stages.filter((s) => s.id === id)),
         start: toMinutes(slot.start),
         end: toMinutes(slot.end),
         endExplicit: slot.end_source === "explicit",

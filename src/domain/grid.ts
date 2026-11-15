@@ -73,3 +73,30 @@ export function rowsByStage(day: Day): ListRow[][] {
   }
   return rows;
 }
+
+/**
+ * ステージごとの、同時中継で映される枠（ステージの並び順）。
+ * 中継先のステージの列にも「中継」として出すために使う。選択は元の枠と同じ単位を使う
+ */
+export function relayRowsByStage(day: Day): ListRow[][] {
+  const rows: ListRow[][] = day.stages.map(() => []);
+  for (const unit of unitsForDay(day)) {
+    for (const relayStage of unit.relayStages) {
+      const stageRows = rows[day.stages.indexOf(relayStage)];
+      const row = stageRows.find((r) => r.slot === unit.slot);
+      if (row) row.units.push(unit);
+      else stageRows.push({ slot: unit.slot, units: [unit] });
+    }
+  }
+  return rows;
+}
+
+/**
+ * ステージが閉まっている時間帯（closed）の位置と高さ（px）。表示範囲からはみ出す分は切り詰め、範囲の外なら null
+ */
+export function closedBox(range: GridRange, start: number, end: number): { top: number; height: number } | null {
+  const from = Math.max(start, range.from);
+  const to = Math.min(end, range.to);
+  if (to <= from) return null;
+  return { top: gridOffset(range, from), height: (to - from) * PX_PER_MINUTE };
+}

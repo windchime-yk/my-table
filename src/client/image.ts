@@ -83,6 +83,9 @@ export function renderMyTable({ doc, day, units, overlaps }: ImageInput): Promis
       [slot.kind_label, order ? `${order.index}/${order.total}本目` : null].filter(Boolean).join(" "),
       item ? null : slot.subtitle,
       slot.note,
+      unit.relayStages.length > 0
+        ? `同時中継: ${unit.relayStages.map((stage) => stage.name).join(NAME_SEPARATOR)}`
+        : null,
       speakers?.join(NAME_SEPARATOR),
     ].filter(Boolean);
     const flagParts = (slot.tags ?? []).map((tag) => doc.tag_definitions?.[tag] ?? tag);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Day } from "../shared/event.ts";
 import {
+  closedBox,
   gridBox,
   gridHeight,
   gridOffset,
@@ -8,6 +9,7 @@ import {
   gridTicks,
   MIN_SLOT_HEIGHT,
   PX_PER_MINUTE,
+  relayRowsByStage,
   rowsByStage,
 } from "./grid.ts";
 
@@ -97,5 +99,65 @@ describe("rowsByStage", () => {
 
   it("枠のないステージは空の配列", () => {
     expect(rowsByStage(emptyDay)).toEqual([[]]);
+  });
+});
+
+describe("relayRowsByStage", () => {
+  const relayDay: Day = {
+    date: "2026-12-05",
+    stages: [
+      {
+        id: "main",
+        name: "Main",
+        slots: [
+          {
+            id: "main-1200",
+            start: "12:00",
+            end: "13:00",
+            end_source: "explicit",
+            title: null,
+            category: "talk",
+            simulcast_in: ["sub", "lounge"],
+            items: [
+              { id: "talk-1", title: "Talk 1" },
+              { id: "talk-2", title: "Talk 2" },
+            ],
+          },
+          { id: "main-1300", start: "13:00", end: "13:30", end_source: "explicit", title: "A", category: "talk" },
+        ],
+      },
+      { id: "sub", name: "Sub", slots: [] },
+      { id: "lounge", name: "Lounge", slots: [] },
+    ],
+  };
+
+  it("中継先のステージに、中継される枠を入れる。元のステージには入れない", () => {
+    const rows = relayRowsByStage(relayDay).map((stageRows) => stageRows.map((row) => row.units.map((u) => u.id)));
+    expect(rows).toEqual([[], [["talk-1", "talk-2"]], [["talk-1", "talk-2"]]]);
+  });
+
+  it("中継がなければ、どのステージも空", () => {
+    expect(relayRowsByStage(day)).toEqual([[], []]);
+  });
+});
+
+describe("closedBox", () => {
+  const range = { from: 720, to: 900 };
+
+  it("閉まっている時間帯の位置と高さ", () => {
+    const box = closedBox(range, 780, 840);
+    expect(box?.top).toBeCloseTo(60 * PX_PER_MINUTE);
+    expect(box?.height).toBeCloseTo(60 * PX_PER_MINUTE);
+  });
+
+  it("表示範囲からはみ出す分は切り詰める", () => {
+    const box = closedBox(range, 600, 780);
+    expect(box?.top).toBe(0);
+    expect(box?.height).toBeCloseTo(60 * PX_PER_MINUTE);
+  });
+
+  it("表示範囲の外なら null", () => {
+    expect(closedBox(range, 600, 720)).toBeNull();
+    expect(closedBox(range, 900, 960)).toBeNull();
   });
 });
