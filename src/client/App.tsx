@@ -4,10 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "hono/jsx";
 import { cx } from "hono/jsx/dom/css";
 import { nowInZone, pickDayIndex } from "../domain/day.ts";
 import { listGroups, type ListGroup, type ListRow } from "../domain/list.ts";
+import { findOverlaps, type Overlap } from "../domain/overlap.ts";
 import { toggleSelected } from "../domain/selection.ts";
 import { stageColor } from "../domain/stage-color.ts";
 import { formatMinutes } from "../domain/time.ts";
-import { timeLabel, unitsForDay, type Unit } from "../domain/unit.ts";
+import { timeLabel, unitsForDay, unitTitle, type Unit } from "../domain/unit.ts";
 import { shortDate } from "../shared/date.ts";
 import type { Day, DayEvent, EventDoc } from "../shared/event.ts";
 import { saveSelection } from "./storage.ts";
@@ -16,9 +17,11 @@ import * as s from "./styles.ts";
 /** all: タイムテーブル / mine: マイテーブル */
 type View = "all" | "mine";
 
-/** 枠の選択。選んでいる ID と、選ぶ・外すの切り替え */
+/** 枠の選択。選んでいる ID、選んだ単位どうしの重なり、選ぶ・外すの切り替え */
 interface Selection {
   selected: Set<string>;
+  /** 表示している日の、選んだ単位どうしの時間の重なり（単位の ID ごと） */
+  overlaps: Map<string, Overlap[]>;
   toggle: (id: string) => void;
 }
 
@@ -64,6 +67,7 @@ export const App: FC<{ doc: EventDoc; initialSelected: string[] }> = ({ doc, ini
   const selected = useMemo(() => new Set(selectedIds), [selectedIds]);
   /** 表示している日のマイテーブル（時刻順） */
   const mine = useMemo(() => unitsForDay(day).filter((unit) => selected.has(unit.id)), [day, selected]);
+  const overlaps = useMemo(() => findOverlaps(mine), [mine]);
   /** 日ごとの選んだ件数。日付のチップに出す */
   const countByDay = useMemo(
     () => doc.days.map((d) => unitsForDay(d).filter((unit) => selected.has(unit.id)).length),
@@ -75,7 +79,7 @@ export const App: FC<{ doc: EventDoc; initialSelected: string[] }> = ({ doc, ini
     setSelectedIds(next);
     setSaveFailed(!saveSelection(doc.id, doc.version, next));
   };
-  const selection: Selection = { selected, toggle };
+  const selection: Selection = { selected, overlaps, toggle };
 
   const switchView = (next: View) => {
     setView(next);
@@ -239,6 +243,27 @@ const Tags: FC<{ doc: EventDoc; tags: string[] | undefined }> = ({ doc, tags }) 
     </span>
   ) : null;
 
+/**
+ * 時間の重なりの知らせ。重なる単位も選べるままにし、相手が分かるよう名前を添える。
+ * 確実な重なりと、推定の終了時刻による「可能性あり」は分けて出す
+ */
+const OverlapFlags: FC<{ overlaps: Overlap[] | undefined }> = ({ overlaps }) => {
+  if (!overlaps || overlaps.length === 0) return null;
+  const names = (certain: boolean) =>
+    overlaps
+      .filter((overlap) => overlap.certain === certain)
+      .map((overlap) => unitTitle(overlap.other))
+      .join("、");
+  const certain = names(true);
+  const possible = names(false);
+  return (
+    <span class={s.flags}>
+      {certain ? <span class={cx(s.flag, s.flagWarn)}>時間が重なっています: {certain}</span> : null}
+      {possible ? <span class={cx(s.flag, s.flagWarn)}>重なっている可能性があります: {possible}</span> : null}
+    </span>
+  );
+};
+
 /** 選んでいるかの印 */
 const Check: FC<{ on: boolean }> = ({ on }) => (
   <span class={cx(s.check, on && s.checkOn)} aria-hidden="true">
@@ -269,9 +294,10 @@ const UnitCard: FC<{ doc: EventDoc; unit: Unit; selection: Selection }> = ({ doc
         <span class={s.cardStage}>{unit.stage.name}</span>
         {kind ? <span class={s.muted}>{kind}</span> : null}
       </span>
-      <span class={s.cardTitle}>{item ? item.title : (slot.title ?? slot.kind_label ?? "")}</span>
+      <span class={s.cardTitle}>{unitTitle(unit)}</span>
       {sub.length > 0 ? <span class={s.cardSub}>{sub.join(" · ")}</span> : null}
       <Tags doc={doc} tags={slot.tags} />
+      <OverlapFlags overlaps={selection.overlaps.get(unit.id)} />
       <Check on={on} />
     </button>
   );
@@ -301,8 +327,9 @@ const BlockCard: FC<{ doc: EventDoc; row: ListRow; selection: Selection }> = ({ 
             aria-pressed={pressed(on)}
             onClick={() => selection.toggle(unit.id)}
           >
-            <span class={s.talkTitle}>{unit.item?.title ?? ""}</span>
+            <span class={s.talkTitle}>{unitTitle(unit)}</span>
             {unit.item?.speakers?.length ? <span class={s.cardSub}>{unit.item.speakers.join("・")}</span> : null}
+            <OverlapFlags overlaps={selection.overlaps.get(unit.id)} />
             <Check on={on} />
           </button>
         );

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Day } from "../shared/event.ts";
-import { timeLabel, unitsForDay } from "./unit.ts";
+import { timeLabel, unitsForDay, unitTitle } from "./unit.ts";
 
 const day: Day = {
   date: "2026-12-05",
@@ -89,5 +89,12 @@ describe("timeLabel", () => {
       "talk-1": "12:30–13:00",
       "main-late": "23:30–24:30",
     });
+  });
+});
+
+describe("unitTitle", () => {
+  it("枠は枠の名前、ブロックの中のトークはトークのタイトル", () => {
+    const titles = Object.fromEntries(unitsForDay(day).map((u) => [u.id, unitTitle(u)]));
+    expect(titles).toMatchObject({ "main-1230": "A", "talk-2": "Talk 2" });
   });
 });

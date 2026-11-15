@@ -14,6 +14,7 @@ export const globalClass = css`
       --line: oklch(30.3% 0.014 255);
       --accent: oklch(83.5% 0.21 130);
       --accent-ink: oklch(16.8% 0.007 255);
+      --warn: oklch(82% 0.15 75);
       color-scheme: dark;
     }
 
@@ -26,6 +27,7 @@ export const globalClass = css`
         --line: oklch(90.8% 0.008 255);
         --accent: oklch(56.9% 0.162 133);
         --accent-ink: oklch(100% 0 0);
+        --warn: oklch(52% 0.13 65);
         color-scheme: light;
       }
     }
