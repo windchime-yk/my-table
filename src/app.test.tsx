@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadEvents } from "../scripts/lib/load-events.ts";
 import { CLIENT_SCRIPT, createApp } from "./app.tsx";
 import { fixturesDir } from "../scripts/lib/fixtures.ts";
-import { isEventPayload } from "./shared/payload.ts";
+import { parsePayload } from "./client/payload.ts";
 
 const app = createApp(loadEvents(fixturesDir).data);
 const emptyApp = createApp({ index: [], events: {} });
@@ -58,8 +58,7 @@ describe("イベントページ", () => {
     const body = await get("/e/example-fes-2026");
     const embedded = /<script type="application\/json" id="payload">(.*?)<\/script>/s.exec(body);
     expect(embedded).not.toBeNull();
-    const payload: unknown = JSON.parse(embedded?.[1] ?? "null");
-    expect(isEventPayload(payload)).toBe(true);
+    const payload = parsePayload(embedded?.[1] ?? "");
     expect(payload).toMatchObject({ doc: { id: "example-fes-2026", event: { name: "Example Fes 2026" } } });
     expect(body).toContain(`<script type="module" src="${CLIENT_SCRIPT}"></script>`);
     expect(body).toContain('<div id="app">');

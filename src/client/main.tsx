@@ -3,16 +3,17 @@
 
 import { render } from "hono/jsx/dom";
 import { reconcile, selectableIds } from "../domain/selection.ts";
-import { APP_ELEMENT_ID, isEventPayload, PAYLOAD_ELEMENT_ID } from "../shared/payload.ts";
+import { APP_ELEMENT_ID, PAYLOAD_ELEMENT_ID } from "../shared/payload.ts";
 import { App } from "./App.tsx";
+import { parsePayload } from "./payload.ts";
 import { loadSelection, saveSelection } from "./storage.ts";
 
 const root = document.getElementById(APP_ELEMENT_ID);
 const payloadText = document.getElementById(PAYLOAD_ELEMENT_ID)?.textContent;
 
 if (root && payloadText) {
-  const payload: unknown = JSON.parse(payloadText);
-  if (isEventPayload(payload)) {
+  const payload = parsePayload(payloadText);
+  if (payload) {
     const { doc } = payload;
     // 保存してある選択を今のデータに合わせる。初期化はせず、なくなった枠だけを外す
     const reconciled = reconcile(loadSelection(doc.id), doc.version, selectableIds(doc));
