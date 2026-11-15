@@ -53,3 +53,24 @@ export function toggleSelected(selected: string[], id: string): string[] {
 export function selectableIds(doc: Pick<EventDoc, "days">): Set<string> {
   return new Set(doc.days.flatMap((day) => unitsForDay(day).map((unit) => unit.id)));
 }
+
+/** 保存してあった選択を、今のデータに合わせた結果 */
+export interface Reconciled {
+  /** 今のデータにある単位だけを残した選択 */
+  selected: string[];
+  /** なくなって外れた件数 */
+  removed: number;
+  /** 保存したときからデータのバージョンが変わったか */
+  versionChanged: boolean;
+}
+
+/**
+ * 保存してあった選択を、今のデータに合わせる。初期化はせず、なくなった単位だけを外す。
+ * 時刻やステージが変わっただけの枠は ID が同じなので、そのまま残る
+ */
+export function reconcile(stored: Stored | null, version: string, valid: Set<string>): Reconciled {
+  if (!stored) return { selected: [], removed: 0, versionChanged: false };
+  const unique = [...new Set(stored.selected)];
+  const selected = unique.filter((id) => valid.has(id));
+  return { selected, removed: unique.length - selected.length, versionChanged: stored.version !== version };
+}
