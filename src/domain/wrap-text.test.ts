@@ -43,6 +43,12 @@ describe("wrapText", () => {
     expect(wrapText("あいうえおかきく", 4, 2, measure)).toEqual(["あいうえ", "おかきく"]);
   });
 
+  it("絵文字を途中で切らない", () => {
+    const family = "👨‍👩‍👧";
+    const lines = wrapText(`${family}${family}${family}`, family.length * 2, 1, measure);
+    expect(lines).toEqual([`${family}…`]);
+  });
+
   it("どの行も幅を超えない", () => {
     const lines = wrapText("The Very Long Name Orchestra feat. Special Guests From Far Away", 12, 3, measure);
     expect(lines).toHaveLength(3);

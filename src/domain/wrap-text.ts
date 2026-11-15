@@ -4,6 +4,10 @@
 const TOKEN = /[\p{Script=Latin}\p{N}'’.\-()&!?:/]+|\s+|./gsu;
 const SPACES = /^\s+$/;
 
+const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+/** 見た目の1文字ごとに分ける（絵文字や結合文字を途中で切らないように） */
+const graphemes = (text: string): string[] => Array.from(segmenter.segment(text), (part) => part.segment);
+
 /**
  * 文字列を、幅に収まる行に分ける。
  * - 英数字の連続は1語として扱い、単語の途中では折り返さない（1語が1行に収まらないときだけ、文字単位で分ける）
@@ -47,7 +51,7 @@ export function wrapText(
       continue;
     }
     // 1語が1行に収まらないので、文字単位で分ける
-    for (const char of token) {
+    for (const char of graphemes(token)) {
       if (current !== "" && !fits(current + char) && !breakLine()) {
         overflow = true;
         break;
@@ -62,7 +66,7 @@ export function wrapText(
   }
 
   // 収まりきらなかったので、最後の行を省略記号で詰める
-  let last = [...(lines.at(-1) ?? "")];
+  let last = graphemes(lines.at(-1) ?? "");
   while (last.length > 0 && !fits(`${last.join("")}…`)) last = last.slice(0, -1);
   lines[lines.length - 1] = `${last.join("").trimEnd()}…`;
   return lines;
