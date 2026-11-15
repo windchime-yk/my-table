@@ -1,7 +1,7 @@
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
 /** YYYY-MM-DD の曜日（日〜土）。タイムゾーンに左右されないよう UTC で計算する */
-export const weekday = (date: string): string => WEEKDAYS[new Date(`${date}T00:00:00Z`).getUTCDay()];
+const weekday = (date: string): string => WEEKDAYS[new Date(`${date}T00:00:00Z`).getUTCDay()];
 
 const parts = (date: string) => {
   const [y, m, d] = date.split("-").map(Number);
