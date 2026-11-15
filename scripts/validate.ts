@@ -1,4 +1,4 @@
-// イベントデータの整合チェックを手元で実行する。依存パッケージなし（Node でそのまま動く）。
+// イベントデータの整合チェックを手元で実行する。ビルドせずに、TypeScript のまま Node で動かす（`pnpm install` は必要）。
 // 使い方:
 //   pnpm validate                         events/*.json すべて
 //   pnpm validate path/to/event.json ...  指定したファイルだけ
