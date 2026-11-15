@@ -19,6 +19,55 @@ export const dayLine = css`
   font-weight: 700;
 `;
 
+// ---------- 日付の切り替え ----------
+
+/** 日数が多いときは横にスクロールする */
+export const dayChips = css`
+  display: flex;
+  gap: 16px;
+  margin: 12px 0 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+`;
+
+/** 「タイムテーブル / マイテーブル」より軽く見えるよう、枠を付けず下線で選択を示す */
+export const dayChip = css`
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+`;
+
+export const dayChipOn = css`
+  border-bottom-color: var(--accent);
+  color: var(--ink);
+  font-weight: 700;
+`;
+
+export const dayChipLabel = css`
+  font-size: 0.75rem;
+`;
+
+/** その日に選んでいる件数 */
+export const dayChipCount = css`
+  min-width: 1.5em;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+`;
+
 // ---------- 表示の切り替え ----------
 
 /** スクロールしても切り替えられるよう、上に固定する */
