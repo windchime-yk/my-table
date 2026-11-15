@@ -98,6 +98,10 @@ export const App: FC<{ doc: EventDoc }> = ({ doc }) => {
   const [selectedIds, setSelectedIds] = useState(initial.selected);
   const [notice, setNotice] = useState(initial.notice);
   const [saveFailed, setSaveFailed] = useState(initial.saveFailed);
+  /** 作った画像（プレビューのダイアログに出す）。なければ null */
+  const [image, setImage] = useState<PreviewImage | null>(null);
+  /** 読み込むファイルを選ばせる input（画面には出さない） */
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [wide, setWide] = useState(() => window.matchMedia(WIDE_QUERY).matches);
   /** いまの時刻（分単位に切り捨てた、1970年からの分）。分が変わったときだけ描き直す */
@@ -113,9 +117,6 @@ export const App: FC<{ doc: EventDoc }> = ({ doc }) => {
       document.removeEventListener("visibilitychange", tick);
     };
   }, []);
-  const fileRef = useRef<HTMLInputElement>(null);
-  /** 作った画像（プレビューのダイアログに出す）。なければ null */
-  const [image, setImage] = useState<PreviewImage | null>(null);
 
   // 画面の幅が変わったら（端末の回転、ウィンドウの大きさの変更）、表示を切り替える
   useEffect(() => {

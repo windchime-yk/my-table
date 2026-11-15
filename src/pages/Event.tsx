@@ -6,8 +6,11 @@ import { APP_ELEMENT_ID, PAYLOAD_ELEMENT_ID, type EventPayload } from "../shared
 import { safeJson } from "../shared/safe-json.ts";
 import { empty, lead, title, wrap } from "../styles.ts";
 
-/** イベントページ。見出しまでの余白を TOP より詰める（スマホで枠が早く見えるように）。wrap のあとに組み合わせる */
-// 広い画面では、ステージを列にした横並び表示が入る幅にする（ブラウザ側の WIDE_QUERY と合わせる）
+/**
+ * イベントページの幅と余白。wrap のあとに組み合わせる。
+ * 見出しまでの余白は TOP より詰める（スマホで枠が早く見えるように）。
+ * 広い画面では、ステージを列にした横並び表示が入る幅にする（ブラウザ側の WIDE_QUERY と合わせる）
+ */
 const eventMain = css`
   padding-block: 20px 56px;
 

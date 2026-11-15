@@ -10,8 +10,6 @@ export type DayEvent = NonNullable<Day["day_events"]>[number];
 export type Stage = Day["stages"][number];
 export type Slot = Stage["slots"][number];
 export type Item = NonNullable<Slot["items"]>[number];
-export type EndSource = Slot["end_source"];
-export type Category = Slot["category"];
 
 /** ビルド時に付けた情報を足した、サイトに同梱するイベント */
 export interface EventDoc extends Omit<EventFile, "$schema" | "visibility"> {
