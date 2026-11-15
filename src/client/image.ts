@@ -16,6 +16,7 @@ const PAD = 64;
 /** カードの左端・右端 */
 const CARD_X = PAD - 24;
 const CARD_W = WIDTH - CARD_X * 2;
+const CARD_RADIUS = 20;
 /** カード左の、ステージ色の帯の幅 */
 const STRIPE_W = 10;
 /** タイトルなどの文字の左端。ここより左を時刻の列にする */
@@ -134,12 +135,16 @@ export function renderMyTable({ doc, day, units, overlaps }: ImageInput): Promis
     const { unit } = row;
     const color = stageColor(unit.stage, unit.stageIndex);
 
+    // カードの角丸で切り抜いてから、地の色とステージ色の帯を塗る。
+    // 帯を別の四角形として重ねると、カードの丸い角から帯の角がはみ出す
+    ctx.save();
+    roundRect(ctx, CARD_X, y, CARD_W, row.height, CARD_RADIUS);
+    ctx.clip();
     fillTheme("surface");
-    roundRect(ctx, CARD_X, y, CARD_W, row.height, 20);
-    ctx.fill();
+    ctx.fillRect(CARD_X, y, CARD_W, row.height);
     ctx.fillStyle = color;
-    roundRect(ctx, CARD_X, y, STRIPE_W, row.height, 5);
-    ctx.fill();
+    ctx.fillRect(CARD_X, y, STRIPE_W, row.height);
+    ctx.restore();
 
     let textY = y + 28 + 26;
 
