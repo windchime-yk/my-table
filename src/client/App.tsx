@@ -1,7 +1,8 @@
 /** @jsxImportSource hono/jsx/dom */
 import type { FC } from "hono/jsx";
-import { useMemo, useState } from "hono/jsx";
+import { useEffect, useMemo, useRef, useState } from "hono/jsx";
 import { cx } from "hono/jsx/dom/css";
+import { nowInZone, pickDayIndex } from "../domain/day.ts";
 import { listGroups, type ListGroup, type ListRow } from "../domain/list.ts";
 import { toggleSelected } from "../domain/selection.ts";
 import { stageColor } from "../domain/stage-color.ts";
@@ -26,19 +27,48 @@ const stageStyle = (color: string) => `--stage:${color}`;
 
 const pressed = (on: boolean) => (on ? "true" : "false");
 
+/** 開いたとき・戻る/進むのときに表示する日。URL の ?day= → 今日が開催日ならその日 → 初日 */
+const dayIndexFromUrl = (doc: EventDoc): number =>
+  pickDayIndex(
+    doc.days,
+    new URLSearchParams(location.search).get("day"),
+    nowInZone(doc.event.timezone, new Date())?.date ?? null,
+  );
+
 export const App: FC<{ doc: EventDoc; initialSelected: string[] }> = ({ doc, initialSelected }) => {
+  const [dayIndex, setDayIndex] = useState(() => dayIndexFromUrl(doc));
   const [view, setView] = useState<View>("all");
-  /** 絞り込むステージの ID。null は「すべて」 */
-  const [stageId, setStageId] = useState<string | null>(null);
+  /** 絞り込むステージ。null は「すべて」 */
+  const [stageFilter, setStageFilter] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState(initialSelected);
   const [saveFailed, setSaveFailed] = useState(false);
 
-  // 日付の切り替えを入れるまでは、初日だけを出す
-  const day = doc.days[0];
+  const dayNavRef = useRef<HTMLElement>(null);
+
+  // ブラウザの「戻る」「進む」で ?day= が変わったら、表示する日を合わせる
+  useEffect(() => {
+    const onPopState = () => setDayIndex(dayIndexFromUrl(doc));
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [doc]);
+
+  // 選んだ日のチップが横スクロールの外にあれば、見える位置まで寄せる
+  useEffect(() => {
+    dayNavRef.current?.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [dayIndex]);
+
+  const day = doc.days[dayIndex];
+  // ステージの ID は日ごとなので、切り替えた先の日にないステージの絞り込みは「すべて」に戻す
+  const stageId = day.stages.some((stage) => stage.id === stageFilter) ? stageFilter : null;
   const groups = useMemo(() => listGroups(day, stageId), [day, stageId]);
   const selected = useMemo(() => new Set(selectedIds), [selectedIds]);
   /** 表示している日のマイテーブル（時刻順） */
   const mine = useMemo(() => unitsForDay(day).filter((unit) => selected.has(unit.id)), [day, selected]);
+  /** 日ごとの選んだ件数。日付のチップに出す */
+  const countByDay = useMemo(
+    () => doc.days.map((d) => unitsForDay(d).filter((unit) => selected.has(unit.id)).length),
+    [doc, selected],
+  );
 
   const toggle = (id: string) => {
     const next = toggleSelected(selectedIds, id);
@@ -53,9 +83,36 @@ export const App: FC<{ doc: EventDoc; initialSelected: string[] }> = ({ doc, ini
     window.scrollTo({ top: 0 });
   };
 
+  /** 日付を切り替える。URL の ?day= も変え、ブラウザの「戻る」で前の日に戻れるようにする */
+  const selectDay = (index: number) => {
+    if (index === dayIndex) return;
+    setDayIndex(index);
+    const url = new URL(location.href);
+    url.searchParams.set("day", doc.days[index].date);
+    history.pushState(null, "", url);
+  };
+
   return (
     <>
-      <p class={s.dayLine}>{[day.label, shortDate(day.date)].filter(Boolean).join(" · ")}</p>
+      {doc.days.length > 1 ? (
+        // 「タイムテーブル / マイテーブル」より上の階層なので上に置き、見た目は一段軽くする
+        <nav ref={dayNavRef} class={s.dayChips} aria-label="日付">
+          {doc.days.map((d, i) => (
+            <button
+              type="button"
+              class={cx(s.dayChip, i === dayIndex && s.dayChipOn)}
+              aria-pressed={pressed(i === dayIndex)}
+              onClick={() => selectDay(i)}
+            >
+              {d.label ? <span class={s.dayChipLabel}>{d.label}</span> : null}
+              <span>{shortDate(d.date)}</span>
+              {countByDay[i] > 0 ? <span class={s.dayChipCount}>{countByDay[i]}</span> : null}
+            </button>
+          ))}
+        </nav>
+      ) : (
+        <p class={s.dayLine}>{[day.label, shortDate(day.date)].filter(Boolean).join(" · ")}</p>
+      )}
 
       <nav class={s.views} aria-label="表示">
         <button
@@ -86,7 +143,7 @@ export const App: FC<{ doc: EventDoc; initialSelected: string[] }> = ({ doc, ini
         <MineView doc={doc} units={mine} selection={selection} />
       ) : (
         <>
-          <StageChips day={day} stageId={stageId} onChange={setStageId} />
+          <StageChips day={day} stageId={stageId} onChange={setStageFilter} />
           <ListView doc={doc} day={day} groups={groups} selection={selection} />
         </>
       )}
