@@ -84,6 +84,27 @@ describe("events プラグイン: 開発サーバー", () => {
   });
 
   it.each([
+    { label: "足す", type: "add", name: "second-fes.json", body: eventJson("second-fes") },
+    { label: "直す", type: "change", name: "first-fes.json", body: eventJson("first-fes", "Renamed Fes") },
+    { label: "消す", type: "unlink", name: "first-fes.json", body: null },
+    { label: "壊す", type: "change", name: "first-fes.json", body: "{ broken" },
+  ] as const)("ファイルを $label と、仮想モジュールが古くなったあとで、ブラウザに再読み込みを1回伝える", async (c) => {
+    await load();
+    const { moduleGraph } = server.environments.ssr;
+    const staleWhenSent: boolean[] = [];
+    vi.spyOn(server.environments.client.hot, "send").mockImplementation((payload: unknown) => {
+      expect(payload).toEqual({ type: "full-reload" });
+      staleWhenSent.push(moduleGraph.getModuleById(`\0${MODULE_ID}`)?.transformResult === null);
+    });
+    if (c.body === null) rmSync(join(dir, c.name));
+    else write(c.name, c.body);
+    notify(c.type, join(dir, c.name));
+    await vi.waitFor(() => expect(staleWhenSent).toHaveLength(1));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(staleWhenSent).toEqual([true]);
+  });
+
+  it.each([
     ["JSON でないファイル", "events/memo.txt"],
     ["events/ の外の JSON", "other.json"],
     ["events/ の下のフォルダの JSON", "events/draft/second-fes.json"],

@@ -111,4 +111,4 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 - Node 26 には Corepack が入っていない。CI は `pnpm/setup` で pnpm と Node を入れている
 - 依存を足したら `pnpm install` でロックファイルも更新してコミットする（CI は `--frozen-lockfile`）
 - スキーマ（`schema/v1/event.ts`）を変えたら `pnpm schema` を実行して JSON Schema もコミットする。`event.schema.json` は Oxfmt の対象外
-- 開発サーバーは、`events/` のファイルの追加・変更・削除を自動で取り込む（`scripts/vite-plugin-events.ts` の `hotUpdate`）。Vite が追うのは読み込み済みのファイルだけなので、このフックを外すと追加したファイルが出てこない。ページには Vite のクライアントを入れていないので、ブラウザは手動で再読み込みする
+- 開発サーバーは、`events/` のファイルの追加・変更・削除を自動で取り込み、ブラウザも再読み込みする（`scripts/vite-plugin-events.ts` の `hotUpdate`）。Vite が追うのは読み込み済みのファイルだけなので、このフックを外すと追加したファイルが出てこない。`src/pages/` などサーバー側のコードを直したときは、ブラウザを手動で再読み込みする

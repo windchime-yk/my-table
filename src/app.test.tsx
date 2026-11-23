@@ -94,6 +94,20 @@ describe("イベントページ", () => {
   });
 });
 
+describe("開発サーバー用の Vite のクライアント", () => {
+  const pages = ["/", "/e/example-fes-2026", "/e/no-such-event", "/no-such-page"];
+  const script = '<script type="module" src="/@vite/client"></script>';
+  const devApp = createApp(loadEvents(fixturesDir).data, { devClientScript: "/@vite/client" });
+
+  it.each(pages)("%s: 指定したときは読み込む", async (path) => {
+    expect(await (await devApp.request(path)).text()).toContain(script);
+  });
+
+  it.each(pages)("%s: 指定しなければ（本番では）読み込まない", async (path) => {
+    expect(await get(path)).not.toContain("/@vite/client");
+  });
+});
+
 describe("JSON Schema の配信", () => {
   it("イベントデータのスキーマを返す", async () => {
     const res = await app.request("/schema/v1/event.schema.json");

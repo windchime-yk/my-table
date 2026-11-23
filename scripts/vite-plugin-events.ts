@@ -29,10 +29,14 @@ export function events(dir: string): Plugin {
     },
     // 開発サーバーで、ファイルの追加・削除も取り込む。足したファイルはまだ addWatchFile されておらず、
     // チェックでエラーになったときも登録されないので、変更も含めてここで仮想モジュールを読み直す
-    hotUpdate({ file, modules }) {
+    hotUpdate({ file, modules, server }) {
       if (!isEventFile(file)) return undefined;
       const mod = this.environment.moduleGraph.getModuleById(RESOLVED_ID);
-      return mod && !modules.includes(mod) ? [...modules, mod] : undefined;
+      if (!mod) return undefined;
+      // ページは Worker が返すので、ブラウザには別に再読み込みを伝える。Vite が仮想モジュールを古いものとして扱うのは
+      // すべての hotUpdate が終わったあとなので、先に伝えて古いデータのページが返らないよう、次のタスクに回す
+      setTimeout(() => server.environments.client.hot.send({ type: "full-reload" }));
+      return modules.includes(mod) ? undefined : [...modules, mod];
     },
   };
 }

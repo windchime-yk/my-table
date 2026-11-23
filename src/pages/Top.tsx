@@ -86,8 +86,8 @@ const notes = css`
   font-size: 0.9rem;
 `;
 
-export const Top: FC<{ events: EventSummary[] }> = ({ events }) => (
-  <Layout>
+export const Top: FC<{ events: EventSummary[]; devClientScript?: string }> = ({ events, devClientScript }) => (
+  <Layout devClientScript={devClientScript}>
     <main class={cx(wrap, main)}>
       <h1 class={title}>マイテーブル</h1>
       <p class={lead}>

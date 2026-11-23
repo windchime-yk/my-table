@@ -19,7 +19,13 @@ const footerInner = css`
 const SITE_NAME = "マイテーブル";
 const REPOSITORY_URL = "https://github.com/windchime-yk/my-table";
 
-export const Layout: FC<PropsWithChildren<{ title?: string }>> = ({ title, children }) => (
+export interface LayoutProps {
+  title?: string;
+  /** 開発サーバー用のスクリプトの URL。本番では指定しない */
+  devClientScript?: string;
+}
+
+export const Layout: FC<PropsWithChildren<LayoutProps>> = ({ title, devClientScript, children }) => (
   <html lang="ja">
     <head>
       <meta charset="UTF-8" />
@@ -32,6 +38,7 @@ export const Layout: FC<PropsWithChildren<{ title?: string }>> = ({ title, child
       <meta name="robots" content="noindex" />
       <title>{title ? `${title} | ${SITE_NAME}` : SITE_NAME}</title>
       <Style />
+      {devClientScript ? <script type="module" src={devClientScript} /> : null}
     </head>
     <body class={globalClass}>
       {children}
