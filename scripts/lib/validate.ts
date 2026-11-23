@@ -1,5 +1,5 @@
 // イベントデータの整合チェック。スキーマ（schema/v1/event.ts）で形を確かめたあと、項目をまたぐ規則を確かめる。
-// エラーはビルドを止める。元データ自体の矛盾（休憩と枠の重なりなど）は警告に留め、自動では直さない。
+// エラーはビルドを止める。元データ自体の矛盾（休憩と枠の重なりなど）や、当日の急ぎの更新を止めたくない確認漏れは警告に留め、自動では直さない。
 
 import { z } from "zod";
 import { eventFileSchema } from "../../schema/v1/event.ts";
@@ -18,6 +18,9 @@ const toMinutes = (time: string): number => {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
 };
+
+const formatTime = (minutes: number): string =>
+  `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 
 interface Span {
   start: number;
@@ -92,6 +95,14 @@ export function validateEvent(value: unknown): ValidationResult {
     // ステージごとの占有時間。同時中継（simulcast_in）は中継先のステージも占有する
     const occupied = new Map<string, Span[]>([...stageIds].map((s) => [s, []]));
 
+    // ステージごとの枠の開始時刻。同時中継の枠は、中継先のステージの枠としても数える
+    const slotStarts = new Map<string, number[]>([...stageIds].map((s) => [s, []]));
+    for (const stage of day.stages) {
+      for (const slot of stage.slots) {
+        for (const s of [stage.id, ...(slot.simulcast_in ?? [])]) slotStarts.get(s)?.push(toMinutes(slot.start));
+      }
+    }
+
     day.stages.forEach((stage, si) => {
       const sp = `${dp}.stages[${si}]`;
       (stage.closed ?? []).forEach((c, ci) => {
@@ -119,6 +130,17 @@ export function validateEvent(value: unknown): ValidationResult {
           if (to === stage.id) error(`${p}.simulcast_in`, "自分のステージは指定できません");
           else if (!stageIds.has(to)) error(`${p}.simulcast_in`, `存在しないステージ "${to}"`);
           else occupied.get(to)?.push({ ...span, what: `${span.what}（中継）` });
+        }
+
+        // 押しなどで次の枠だけを動かすと、終了時刻の根拠が合わなくなる
+        if (slot.end_source === "next_slot") {
+          const later = (slotStarts.get(stage.id) ?? []).filter((s) => s > start);
+          if (later.length === 0) {
+            warn(p, "end_source が next_slot ですが、同じステージに次の枠がありません");
+          } else if (Math.min(...later) !== end) {
+            const next = formatTime(Math.min(...later));
+            warn(p, `end_source が next_slot ですが、終了 ${slot.end} が次の枠の開始 ${next} と違います`);
+          }
         }
 
         for (const ev of dayEvents) {
