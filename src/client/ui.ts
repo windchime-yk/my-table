@@ -15,10 +15,12 @@ export interface CardContext {
   toggle: (id: string) => void;
 }
 
-/** 画面の上に出す知らせ。warn は注意（外れた枠がある、読み込めなかった）、そうでなければ結果の報告 */
+/** 画面の上に出す知らせ。warn は注意（外れた・変わった枠がある、読み込めなかった）、そうでなければ結果の報告 */
 export interface Notice {
   warn: boolean;
   text: string;
+  /** 文の下に並べる内訳（変わった枠など） */
+  lines?: string[];
 }
 
 /** 作った画像（プレビューに出すもの） */

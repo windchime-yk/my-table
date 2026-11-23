@@ -3,6 +3,7 @@
 import { z } from "zod";
 import type { EventDoc } from "../../shared/event.ts";
 import { unitsForDay } from "../timetable/unit.ts";
+import { placementsSchema, type Placements } from "./schedule.ts";
 
 /** 選んだ単位の ID の並び。重複は取り除く */
 export const selectedIdsSchema = z.array(z.string()).transform((ids) => [...new Set(ids)]);
@@ -15,6 +16,8 @@ const storedSchema = z.object({
   selected: selectedIdsSchema,
   /** 保存した日時（ISO 8601）。なくても読めるようにする */
   updatedAt: z.string().catch(""),
+  /** 保存したときの、選んだ単位の予定。次に開いたときに、変わったものを知らせるため */
+  placements: placementsSchema,
 });
 
 export type Stored = z.output<typeof storedSchema>;
@@ -23,8 +26,8 @@ export type Stored = z.output<typeof storedSchema>;
 export const storageKey = (eventId: string): string => `my-table:v1:${eventId}`;
 
 /** 保存する値を作る */
-export function buildStored(version: string, selected: string[], now: Date): Stored {
-  return { version, selected, updatedAt: now.toISOString() };
+export function buildStored(version: string, selected: string[], placements: Placements, now: Date): Stored {
+  return { version, selected, updatedAt: now.toISOString(), placements };
 }
 
 /**
@@ -67,7 +70,11 @@ export interface Reconciled {
  * 保存してあった選択を、今のデータに合わせる。初期化はせず、なくなった単位だけを外す。
  * 時刻やステージが変わっただけの枠は ID が同じなので、そのまま残る
  */
-export function reconcile(stored: Stored | null, version: string, valid: Set<string>): Reconciled {
+export function reconcile(
+  stored: Pick<Stored, "version" | "selected"> | null,
+  version: string,
+  valid: Set<string>,
+): Reconciled {
   if (!stored) return { selected: [], removed: 0, versionChanged: false };
   const unique = [...new Set(stored.selected)];
   const selected = unique.filter((id) => valid.has(id));

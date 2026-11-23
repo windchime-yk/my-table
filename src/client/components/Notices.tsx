@@ -19,9 +19,16 @@ const noticeBar = css`
   padding-right: 44px;
 `;
 
-/** 注意の知らせ（外れた枠がある、読み込めなかった） */
+/** 注意の知らせ（外れた・変わった枠がある、読み込めなかった） */
 const noticeWarn = css`
   border-color: var(--warn);
+`;
+
+/** 知らせの内訳 */
+const noticeLines = css`
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+  overflow-wrap: anywhere;
 `;
 
 const noticeClose = css`
@@ -37,14 +44,21 @@ const noticeClose = css`
   cursor: pointer;
 `;
 
-/** 閉じられる知らせ（外れた枠がある、読み込んだ、読み込めなかった） */
+/** 閉じられる知らせ（外れた・変わった枠がある、読み込んだ、読み込めなかった） */
 export const NoticeBar: FC<{ notice: Notice; onClose: () => void }> = ({ notice, onClose }) => (
-  <p class={cx(warning, noticeBar, notice.warn && noticeWarn)} role="status">
+  <div class={cx(warning, noticeBar, notice.warn && noticeWarn)} role="status">
     {notice.text}
+    {notice.lines && notice.lines.length > 0 ? (
+      <ul class={noticeLines}>
+        {notice.lines.map((line) => (
+          <li>{line}</li>
+        ))}
+      </ul>
+    ) : null}
     <button type="button" class={noticeClose} aria-label="閉じる" onClick={onClose}>
       ×
     </button>
-  </p>
+  </div>
 );
 
 /** 選択を保存できなかったときの知らせ */
