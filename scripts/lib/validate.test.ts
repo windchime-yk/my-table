@@ -141,4 +141,47 @@ describe("validateEvent: 項目をまたぐ規則", () => {
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual(["days[0].stages[1].slots[0]: 「休憩」(15:00-15:30) と時間が重なっています"]);
   });
+
+  it("next_slot の終了時刻が次の枠の開始時刻と同じなら警告しない", () => {
+    const doc = validEvent();
+    doc.days[0].stages[0].slots[0].end_source = "next_slot";
+    expect(validateEvent(doc)).toMatchObject({ errors: [], warnings: [] });
+  });
+
+  it("next_slot の終了時刻が次の枠の開始時刻と違うと警告する（深夜帯も同じ表記で出す）", () => {
+    const doc = validEvent();
+    const [first, second, late] = doc.days[0].stages[0].slots;
+    first.end_source = "next_slot";
+    Object.assign(second, { start: "13:15", end: "13:45", end_source: "next_slot" });
+    Object.assign(late, { start: "24:05", end: "24:30" });
+    expect(validateEvent(doc)).toMatchObject({
+      errors: [],
+      warnings: [
+        "days[0].stages[0].slots[0]: end_source が next_slot ですが、終了 13:00 が次の枠の開始 13:15 と違います",
+        "days[0].stages[0].slots[1]: end_source が next_slot ですが、終了 13:45 が次の枠の開始 24:05 と違います",
+      ],
+    });
+  });
+
+  it("枠が開始時刻順に書かれていなくても、次に始まる枠と比べる", () => {
+    const doc = validEvent();
+    doc.days[0].stages[0].slots[0].end_source = "next_slot";
+    doc.days[0].stages[0].slots.reverse();
+    expect(validateEvent(doc)).toMatchObject({ errors: [], warnings: [] });
+  });
+
+  it("同時中継される枠も、中継先のステージの次の枠として扱う", () => {
+    const doc = validEvent();
+    doc.days[0].stages[1].slots[0].end_source = "next_slot";
+    expect(validateEvent(doc)).toMatchObject({ errors: [], warnings: [] });
+  });
+
+  it("次の枠がない next_slot は警告する", () => {
+    const doc = validEvent();
+    doc.days[1].stages[0].slots[0].end_source = "next_slot";
+    expect(validateEvent(doc)).toMatchObject({
+      errors: [],
+      warnings: ["days[1].stages[0].slots[0]: end_source が next_slot ですが、同じステージに次の枠がありません"],
+    });
+  });
 });

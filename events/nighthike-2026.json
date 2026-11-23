@@ -767,7 +767,7 @@
               "id": "d2-night-1715",
               "start": "17:15",
               "end": "17:55",
-              "end_source": "next_slot",
+              "end_source": "inferred",
               "title": "Aiobahn",
               "speakers": [],
               "kind_label": "DJ",
