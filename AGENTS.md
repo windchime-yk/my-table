@@ -106,7 +106,7 @@ docs/SPEC.md                  設計・データの流れ・スキーマ・デ�
 
 ## ハマりどころ
 
-- `wrangler.jsonc` の `compatibility_date` は、入っている wrangler（workerd）が対応する日付までしか上げられない。未来の日付にすると `pnpm dev` が `ERR_FUTURE_COMPATIBILITY_DATE` で落ちる
+- `wrangler.jsonc` の `compatibility_date` は、入っている wrangler（workerd）が対応する日付までしか上げられない。未来の日付にすると `pnpm dev` が `ERR_FUTURE_COMPATIBILITY_DATE` で落ちる。wrangler と `@cloudflare/vite-plugin` が別の版の workerd を使うことがあり、そのときは古いほうに合わせる（`pnpm dev` は vite-plugin 側を使う）
 - `wrangler.jsonc` の `"previews": {}` は消さない。ないと main 以外のブランチのビルド（`wrangler preview`）が失敗する
 - Node 26 には Corepack が入っていない。CI は `pnpm/setup` で pnpm と Node を入れている
 - 依存を足したら `pnpm install` でロックファイルも更新してコミットする（CI は `--frozen-lockfile`）
