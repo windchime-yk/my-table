@@ -9,6 +9,24 @@ https://mt.whyk.dev
 
 設計とデータの流れ、イベントデータの形式（スキーマ）は [docs/SPEC.md](docs/SPEC.md) を参照。
 
+## このリポジトリについて
+
+このリポジトリと https://mt.whyk.dev は、マイテーブルの**リファレンス実装**。個人のプロジェクトなので、イベントデータの追加や更新の依頼・PR には対応しづらい。
+
+ほかのイベントで使いたいときは、このリポジトリをテンプレートにするかフォークして、自分なりのマイテーブルのサイトを作ってほしい。
+
+### 自分のサイトを作る
+
+1. GitHub の「Use this template」かフォークで、自分のリポジトリを作る
+2. 次のところを自分のものに置き換える
+   - `events/`: 入っているイベントを消し、自分のイベントを置く（[イベントを追加・更新する](#イベントを追加更新する)）
+   - `wrangler.jsonc` の `name`: Worker の名前
+   - `src/components/Layout.tsx`: サイト名・リポジトリの URL・フッターの名前（`src/app.test.tsx` でも確かめている）
+   - `README.md`・`AGENTS.md`: サイトの URL、コミットの作成者など
+3. Cloudflare Workers にデプロイする。このリポジトリでは Cloudflare Workers Builds を使っている
+
+スキーマを変えないなら、`$schema` の URL はそのまま使える。変えるときは、`schema/v1/event.ts` の `SCHEMA_URL` を自分の URL にして、`pnpm schema` で JSON Schema を作り直す。
+
 ## 手元で動かす
 
 Node は `.node-version` のバージョンを使う。
