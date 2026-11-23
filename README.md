@@ -11,7 +11,7 @@ https://mt.whyk.dev
 
 ## このリポジトリについて
 
-このリポジトリと https://mt.whyk.dev は、マイテーブルの**リファレンス実装**。個人のプロジェクトなので、イベントデータの追加や更新の依頼には対応しづらい。PR を出してもらえれば、できる範囲で対応する。
+このリポジトリと https://mt.whyk.dev は、マイテーブルの**リファレンス実装**。個人のプロジェクトなので、イベントデータの追加や更新の依頼には対応しづらい。PR を出してもらえれば、できる範囲で対応する。コードや文書の PR も受けるが、大きな変更は先に Issue で相談してほしい。
 
 ほかのイベントで使いたいときは、このリポジトリをテンプレートにするかフォークして、自分なりのマイテーブルのサイトを作ってほしい。
 
@@ -21,15 +21,15 @@ https://mt.whyk.dev
 2. 次のところを自分のものに置き換える
    - `events/`: 入っているイベントを消し、自分のイベントを置く（[イベントを追加・更新する](#イベントを追加更新する)）
    - `wrangler.jsonc` の `name`: Worker の名前
-   - `src/components/Layout.tsx`: サイト名・リポジトリの URL・フッターの名前（`src/app.test.tsx` でも確かめている）
-   - `README.md`・`AGENTS.md`: サイトの URL、コミットの作成者など
+   - `src/components/Layout.tsx`・`src/pages/Top.tsx`: サイト名・トップの見出し・リポジトリの URL・フッターの名前（`src/app.test.tsx` でも確かめている）
+   - `README.md`・`AGENTS.md`: サイトの URL、コミットの作成者、リファレンス実装であることや PR の出し先（残すと、自分のサイト用の PR をエージェントがこのリポジトリに出すおそれがある）
 3. Cloudflare Workers にデプロイする。このリポジトリでは Cloudflare Workers Builds を使っている
 
 スキーマを変えないなら、`$schema` の URL はそのまま使える。変えるときは、`schema/v1/event.ts` の `SCHEMA_URL` を自分の URL にして、`pnpm schema` で JSON Schema を作り直す。
 
 ## 手元で動かす
 
-Node は `.node-version` のバージョンを使う。
+Node は `.node-version` のバージョンを使う。pnpm は別に入れておく（Node 26 には Corepack が入っていない）。
 
 ```sh
 pnpm install
@@ -81,3 +81,5 @@ Skill の本体は `.agents/skills/` にあり、Codex などはここから読�
 ## ライセンス
 
 コードは [MIT](LICENSE)。
+
+イベントデータ（`events/`）は、公式の情報から時刻や出演者名などの事実を書き出したもの。自分で使うときは、各公式の案内を確認してほしい。
