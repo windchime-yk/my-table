@@ -1,7 +1,9 @@
 // 選択の読み書き。localStorage は使えない・消えることがある前提で、失敗しても落ちないようにする
 // （プライベートブラウズや、サイトデータを保存しない設定では、触るだけで例外になることがある）
 
+import { placementsOf } from "../core/my-table/schedule.ts";
 import { buildStored, parseStored, storageKey, type Stored } from "../core/my-table/selection.ts";
+import type { EventDoc } from "../shared/event.ts";
 
 type StorageLike = Pick<Storage, "getItem" | "setItem">;
 
@@ -17,15 +19,15 @@ export function loadSelection(eventId: string, getStorage: () => StorageLike = b
   }
 }
 
-/** 選択を保存する。保存できたら true、できなかったら false */
+/** 選択と、選んだ単位の今の予定を保存する。保存できたら true、できなかったら false */
 export function saveSelection(
-  eventId: string,
-  version: string,
+  doc: Pick<EventDoc, "id" | "version" | "days">,
   selected: string[],
   getStorage: () => StorageLike = browserStorage,
 ): boolean {
   try {
-    getStorage().setItem(storageKey(eventId), JSON.stringify(buildStored(version, selected, new Date())));
+    const stored = buildStored(doc.version, selected, placementsOf(doc, selected), new Date());
+    getStorage().setItem(storageKey(doc.id), JSON.stringify(stored));
     return true;
   } catch {
     return false;

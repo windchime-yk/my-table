@@ -7,6 +7,7 @@ import { buildExport, parseImport } from "../core/my-table/export-file.ts";
 import { gridRange } from "../core/timetable/grid.ts";
 import { listGroups } from "../core/timetable/list.ts";
 import { findOverlaps } from "../core/my-table/overlap.ts";
+import { findScheduleChanges, updateMessage } from "../core/my-table/schedule.ts";
 import { reconcile, selectableIds, toggleSelected } from "../core/my-table/selection.ts";
 import { unitsForDay } from "../core/timetable/unit.ts";
 import { shortDate } from "../shared/date.ts";
@@ -74,18 +75,20 @@ const dayIndexFromUrl = (doc: EventDoc): number =>
   );
 
 /**
- * 開いたときの選択。保存してあるものを今のデータに合わせる（初期化はせず、なくなった枠だけを外す）。
- * データが更新されていたら、合わせた結果を今のバージョンで保存し直す（次に開いたときに同じ知らせを出さないため）
+ * 開いたときの選択。保存してあるものを今のデータに合わせ（初期化はせず、なくなった枠だけを外す）、
+ * 外れた・時刻やステージが変わったものがあれば知らせる。
+ * データが更新されていたら、合わせた結果を今のバージョンで保存し直す（次に開いたときに同じ知らせを出さないため）。
+ * 予定を持たない前の版の保存も、次の更新から比べられるよう保存し直す
  */
 function openSelection(doc: EventDoc): { selected: string[]; notice: Notice | null; saveFailed: boolean } {
-  const reconciled = reconcile(loadSelection(doc.id), doc.version, selectableIds(doc));
-  const notice =
-    reconciled.removed > 0
-      ? { warn: true, text: `タイムテーブルが更新され、選んでいた${reconciled.removed}件が外れました。` }
-      : null;
-  const saveFailed =
-    (reconciled.versionChanged || reconciled.removed > 0) && !saveSelection(doc.id, doc.version, reconciled.selected);
-  return { selected: reconciled.selected, notice, saveFailed };
+  const stored = loadSelection(doc.id);
+  const placements = stored?.placements ?? {};
+  const { selected, removed, versionChanged } = reconcile(stored, doc.version, selectableIds(doc));
+  const message = updateMessage(doc, removed, findScheduleChanges(placements, doc, selected));
+  const notice = message ? { warn: true, ...message } : null;
+  const unplaced = selected.some((id) => !Object.hasOwn(placements, id));
+  const saveFailed = (versionChanged || removed > 0 || unplaced) && !saveSelection(doc, selected);
+  return { selected, notice, saveFailed };
 }
 
 export const App: FC<{ doc: EventDoc }> = ({ doc }) => {
@@ -159,7 +162,7 @@ export const App: FC<{ doc: EventDoc }> = ({ doc }) => {
   /** 選択を入れ替えて保存する */
   const update = (next: string[]) => {
     setSelectedIds(next);
-    setSaveFailed(!saveSelection(doc.id, doc.version, next));
+    setSaveFailed(!saveSelection(doc, next));
   };
   const toggle = (id: string) => update(toggleSelected(selectedIds, id));
 

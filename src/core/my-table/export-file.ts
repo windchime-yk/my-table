@@ -67,6 +67,6 @@ export function parseImport(text: string, doc: Pick<EventDoc, "id" | "version">,
   if (file.eventId !== doc.id) {
     return { ok: false, reason: "other_event", eventId: file.eventId, eventName: file.eventName ?? null };
   }
-  const reconciled = reconcile({ version: file.version, selected: file.selected, updatedAt: "" }, doc.version, valid);
+  const reconciled = reconcile(file, doc.version, valid);
   return { ok: true, ...reconciled };
 }

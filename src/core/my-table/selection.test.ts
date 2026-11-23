@@ -11,8 +11,14 @@ describe("storageKey", () => {
 
 describe("buildStored / parseStored", () => {
   it("保存した値を読み戻せる", () => {
-    const stored = buildStored("abc123", ["a", "b"], new Date("2026-11-01T03:00:00Z"));
-    expect(stored).toEqual({ version: "abc123", selected: ["a", "b"], updatedAt: "2026-11-01T03:00:00.000Z" });
+    const placements = { a: { date: "2026-11-01", stage: "main", start: "12:30", end: null } };
+    const stored = buildStored("abc123", ["a", "b"], placements, new Date("2026-11-01T03:00:00Z"));
+    expect(stored).toEqual({
+      version: "abc123",
+      selected: ["a", "b"],
+      updatedAt: "2026-11-01T03:00:00.000Z",
+      placements,
+    });
     expect(parseStored(JSON.stringify(stored))).toEqual(stored);
   });
 
@@ -27,8 +33,14 @@ describe("buildStored / parseStored", () => {
   });
 
   it("重複を取り除く", () => {
-    const stored = parseStored('{"version":"v","selected":["a","b","a"]}');
-    expect(stored).toEqual({ version: "v", selected: ["a", "b"], updatedAt: "" });
+    expect(parseStored('{"version":"v","selected":["a","b","a"]}')?.selected).toEqual(["a", "b"]);
+  });
+
+  it.each([
+    ["予定がない（前の版の保存）", '{"version":"v","selected":["a"]}'],
+    ["予定の形が違う", '{"version":"v","selected":["a"],"placements":{"a":1}}'],
+  ])("%s ときも選択は読み、予定は空にする", (_, raw) => {
+    expect(parseStored(raw)).toEqual({ version: "v", selected: ["a"], updatedAt: "", placements: {} });
   });
 
   it("文字列でない ID が混ざっているときは null", () => {
@@ -64,7 +76,7 @@ describe("selectableIds", () => {
   });
 });
 
-const stored = (version: string, selected: string[]) => ({ version, selected, updatedAt: "" });
+const stored = (version: string, selected: string[]) => ({ version, selected });
 
 describe("reconcile", () => {
   const valid = new Set(["a1", "b2", "c3"]);
