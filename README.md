@@ -22,6 +22,15 @@ pnpm dev
 
 タイムテーブルは `events/<event-id>.json` に1イベント1ファイルで置く。形式は [docs/SPEC.md](docs/SPEC.md#イベントデータ) と [JSON Schema](schema/v1/event.schema.json)（https://mt.whyk.dev/schema/v1/event.schema.json でも配信）を参照。スキーマの定義元は Zod で書いた [schema/v1/event.ts](schema/v1/event.ts) で、JSON Schema はそこから生成している。
 
+### イベントを追加・更新する
+
+手順は、AI エージェント用の Skill にまとめている。人が手で作るときも、同じ手順で進められる。
+
+- [イベントを追加する](.agents/skills/add-event/SKILL.md)（`add-event`）: 公式のタイムテーブルから `events/<event-id>.json` を作る
+- [イベントのデータを更新する](.agents/skills/update-event/SKILL.md)（`update-event`）: 押し・時刻変更・リトライ・キャンセルを反映する
+
+Skill の本体は `.agents/skills/` にあり、Codex などはここから読む。Claude Code は `.claude/skills/` を読むので、そこに Skill ごとのシンボリックリンクを置いている。
+
 ## スクリプト
 
 | コマンド                      | 内容                                              |
