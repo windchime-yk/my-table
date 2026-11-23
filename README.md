@@ -49,6 +49,22 @@ pnpm dev
 
 Skill の本体は `.agents/skills/` にあり、Codex などはここから読む。Claude Code は `.claude/skills/` を読むので、そこに Skill ごとのシンボリックリンクを置いている。
 
+### AI エージェントに PR を出してもらう
+
+1. このリポジトリをフォークし、手元に clone して `pnpm install` を実行する
+2. フォークしたフォルダで、Claude Code や Codex を開く
+3. 公式のタイムテーブル（画像・URL・テキスト）を渡して、次のように頼む
+
+   ```text
+   add-event の手順で、◯◯フェス 2027 を追加して。
+   会場は◯◯、公式サイトは https://…、出どころは公式サイト。公開してよい。
+   できたら、windchime-yk/my-table に PR を出して
+   ```
+
+4. AI の質問に答え、PR を出す前に、データが公式と合っているかを自分で確かめる
+
+時刻変更などは `update-event` の手順で頼む。GitHub CLI（`gh`）でログインしていないときは、PR だけ手で作る。
+
 ## スクリプト
 
 | コマンド                      | 内容                                              |

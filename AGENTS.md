@@ -14,11 +14,12 @@ AI エージェント（Claude Code など）がこのリポジトリで作業�
 
 ## 作業の進め方
 
-- 作業は GitHub Issue 単位で行う。1 Issue につき1ブランチ・1 PR。PR の説明に `Closes #<番号>` を書く
+- 作業は GitHub Issue 単位で行う。1 Issue につき1ブランチ・1 PR。PR の説明に `Closes #<番号>` を書く。持ち主（WhyK）以外の人によるイベントデータの追加・更新は、Issue なしでよい
+- 書き込み権限がないときは、フォークにブランチを push して、フォークから `windchime-yk/my-table` の main に PR を出す
 - ブランチ名は `feat/…` `fix/…` `chore/…` `docs/…` `ci/…`
 - PR のタイトルは Conventional Commits（例: `feat: add event page`）。マージは Squash
 - コミットメッセージも Conventional Commits で、英語で書く。PR の説明・ドキュメント・コード内のコメント・画面の文言は日本語
-- コミットの作成者は `WhyK <16016681+windchime-yk@users.noreply.github.com>`。個人のメールアドレスを履歴に載せない
+- コミットの作成者は、持ち主の作業なら `WhyK <16016681+windchime-yk@users.noreply.github.com>`。ほかの人の作業では、その人の Git の設定をそのまま使い、WhyK の名前にしない。どちらも、個人のメールアドレスを履歴に載せない（GitHub の noreply アドレスを使う。設定が個人のアドレスなら、コミットの前に本人に確かめる）
 - main に直接 push しない。デプロイは main へのマージで自動で走る
 - 機能を足したら、関係する docs/SPEC.md・README.md もその PR で更新する
 
