@@ -13,7 +13,7 @@ export default defineConfig({
     // （src/app.tsx の CLIENT_SCRIPT と合わせる）。静的アセットは毎回 ETag で確かめられるので、古いものは残らない
     client: {
       build: {
-        rollupOptions: {
+        rolldownOptions: {
           input: fileURLToPath(new URL("./src/client/main.tsx", import.meta.url)),
           output: {
             entryFileNames: "static/client.js",
