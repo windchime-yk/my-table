@@ -36,7 +36,7 @@ export function createApp(data: EventsData, { clientScript = CLIENT_SCRIPT, devC
     );
   });
 
-  // フォークした人やエディタ・AI エージェントが参照できるよう、イベントデータの JSON Schema を配信する
+  // テンプレートから自分のサイトを作った人やエディタ・AI エージェントが参照できるよう、イベントデータの JSON Schema を配信する
   app.get("/schema/v1/event.schema.json", (c) => {
     c.header("Access-Control-Allow-Origin", "*");
     c.header("Cache-Control", "public, max-age=3600");
