@@ -66,10 +66,14 @@ const About: FC<{ doc: EventDoc }> = ({ doc }) => {
  * イベントページ。タイムテーブルはブラウザ側（src/client/）が描くので、
  * サーバーは枠組みと、初期データを埋め込んだ script 要素を返す
  */
-export const EventPage: FC<{ doc: EventDoc; clientScript: string }> = ({ doc, clientScript }) => {
+export const EventPage: FC<{ doc: EventDoc; clientScript: string; devClientScript?: string }> = ({
+  doc,
+  clientScript,
+  devClientScript,
+}) => {
   const payload: EventPayload = { doc };
   return (
-    <Layout title={doc.event.name}>
+    <Layout title={doc.event.name} devClientScript={devClientScript}>
       <main class={cx(wrap, eventMain)}>
         <p class={backLink}>
           <a href="/">← イベント一覧</a>
